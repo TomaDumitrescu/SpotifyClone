@@ -8,9 +8,14 @@ import app.audio.Collections.AlbumOutput;
 import app.audio.Files.Song;
 import app.pages.ArtistPage;
 
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * The type Artist.
  */
+@Getter
+@Setter
 public final class Artist extends ContentCreator {
     private ArrayList<Album> albums;
     private ArrayList<Merchandise> merch;
@@ -30,33 +35,6 @@ public final class Artist extends ContentCreator {
         events = new ArrayList<>();
 
         super.setPage(new ArtistPage(this));
-    }
-
-    /**
-     * Gets albums.
-     *
-     * @return the albums
-     */
-    public ArrayList<Album> getAlbums() {
-        return albums;
-    }
-
-    /**
-     * Gets merch.
-     *
-     * @return the merch
-     */
-    public ArrayList<Merchandise> getMerch() {
-        return merch;
-    }
-
-    /**
-     * Gets events.
-     *
-     * @return the events
-     */
-    public ArrayList<Event> getEvents() {
-        return events;
     }
 
     /**

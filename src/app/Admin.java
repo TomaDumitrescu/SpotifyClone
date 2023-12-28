@@ -8,13 +8,14 @@ import app.audio.Files.AudioFile;
 import app.audio.Files.Episode;
 import app.audio.Files.Song;
 import app.player.Player;
-import app.user.Announcement;
-import app.user.Artist;
-import app.user.Event;
-import app.user.Host;
-import app.user.Merchandise;
 import app.user.User;
+import app.user.Artist;
+import app.user.Host;
+import app.user.UserFactory;
 import app.user.UserAbstract;
+import app.user.Event;
+import app.user.Announcement;
+import app.user.Merchandise;
 import fileio.input.CommandInput;
 import fileio.input.EpisodeInput;
 import fileio.input.PodcastInput;
@@ -264,11 +265,11 @@ public final class Admin {
         }
 
         if (type.equals("user")) {
-            users.add(new User(username, age, city));
+            users.add((User) UserFactory.createUser(type, username, age, city));
         } else if (type.equals("artist")) {
-            artists.add(new Artist(username, age, city));
+            artists.add((Artist) UserFactory.createUser(type, username, age, city));
         } else {
-            hosts.add(new Host(username, age, city));
+            hosts.add((Host) UserFactory.createUser(type, username, age, city));
         }
 
         return "The username %s has been added successfully.".formatted(username);

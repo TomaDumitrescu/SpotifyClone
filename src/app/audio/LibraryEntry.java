@@ -1,6 +1,7 @@
 package app.audio;
 
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 
@@ -10,6 +11,8 @@ import java.util.ArrayList;
 @Getter
 public abstract class LibraryEntry {
     private final String name;
+    @Setter
+    private int listens = 0;
 
     /**
      * Instantiates a new Library entry.

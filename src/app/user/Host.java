@@ -3,11 +3,16 @@ package app.user;
 import app.audio.Collections.Podcast;
 import app.pages.HostPage;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.ArrayList;
 
 /**
  * The type Host.
  */
+@Getter
+@Setter
 public final class Host extends ContentCreator {
     private ArrayList<Podcast> podcasts;
     private ArrayList<Announcement> announcements;
@@ -25,42 +30,6 @@ public final class Host extends ContentCreator {
         announcements = new ArrayList<>();
 
         super.setPage(new HostPage(this));
-    }
-
-    /**
-     * Gets podcasts.
-     *
-     * @return the podcasts
-     */
-    public ArrayList<Podcast> getPodcasts() {
-        return podcasts;
-    }
-
-    /**
-     * Sets podcasts.
-     *
-     * @param podcasts the podcasts
-     */
-    public void setPodcasts(final ArrayList<Podcast> podcasts) {
-        this.podcasts = podcasts;
-    }
-
-    /**
-     * Gets announcements.
-     *
-     * @return the announcements
-     */
-    public ArrayList<Announcement> getAnnouncements() {
-        return announcements;
-    }
-
-    /**
-     * Sets announcements.
-     *
-     * @param announcements the announcements
-     */
-    public void setAnnouncements(final ArrayList<Announcement> announcements) {
-        this.announcements = announcements;
     }
 
     /**

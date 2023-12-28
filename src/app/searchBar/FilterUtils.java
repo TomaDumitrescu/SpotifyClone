@@ -9,8 +9,21 @@ import java.util.List;
  * The type Filter utils.
  */
 public final class FilterUtils {
+    private static FilterUtils instance;
 
     private FilterUtils() {
+    }
+
+    /**
+     * Gets instance.
+     *
+     * @return the instance
+     */
+    public static FilterUtils getInstance() {
+        if (instance == null) {
+            instance = new FilterUtils();
+        }
+        return instance;
     }
 
     /**
@@ -20,7 +33,7 @@ public final class FilterUtils {
      * @param name    the name
      * @return the list
      */
-    public static List<LibraryEntry> filterByName(final List<LibraryEntry> entries,
+    public List<LibraryEntry> filterByName(final List<LibraryEntry> entries,
                                                   final String name) {
         List<LibraryEntry> result = new ArrayList<>();
         for (LibraryEntry entry : entries) {
@@ -38,7 +51,7 @@ public final class FilterUtils {
      * @param album   the album
      * @return the list
      */
-    public static List<LibraryEntry> filterByAlbum(final List<LibraryEntry> entries,
+    public List<LibraryEntry> filterByAlbum(final List<LibraryEntry> entries,
                                                    final String album) {
         return filter(entries, entry -> entry.matchesAlbum(album));
     }
@@ -50,7 +63,7 @@ public final class FilterUtils {
      * @param tags    the tags
      * @return the list
      */
-    public static List<LibraryEntry> filterByTags(final List<LibraryEntry> entries,
+    public List<LibraryEntry> filterByTags(final List<LibraryEntry> entries,
                                                   final ArrayList<String> tags) {
         return filter(entries, entry -> entry.matchesTags(tags));
     }
@@ -62,7 +75,7 @@ public final class FilterUtils {
      * @param lyrics  the lyrics
      * @return the list
      */
-    public static List<LibraryEntry> filterByLyrics(final List<LibraryEntry> entries,
+    public List<LibraryEntry> filterByLyrics(final List<LibraryEntry> entries,
                                                     final String lyrics) {
         return filter(entries, entry -> entry.matchesLyrics(lyrics));
     }
@@ -74,7 +87,7 @@ public final class FilterUtils {
      * @param genre   the genre
      * @return the list
      */
-    public static List<LibraryEntry> filterByGenre(final List<LibraryEntry> entries,
+    public List<LibraryEntry> filterByGenre(final List<LibraryEntry> entries,
                                                    final String genre) {
         return filter(entries, entry -> entry.matchesGenre(genre));
     }
@@ -86,7 +99,7 @@ public final class FilterUtils {
      * @param artist  the artist
      * @return the list
      */
-    public static List<LibraryEntry> filterByArtist(final List<LibraryEntry> entries,
+    public List<LibraryEntry> filterByArtist(final List<LibraryEntry> entries,
                                                     final String artist) {
         return filter(entries, entry -> entry.matchesArtist(artist));
     }
@@ -98,7 +111,7 @@ public final class FilterUtils {
      * @param releaseYear the release year
      * @return the list
      */
-    public static List<LibraryEntry> filterByReleaseYear(final List<LibraryEntry> entries,
+    public List<LibraryEntry> filterByReleaseYear(final List<LibraryEntry> entries,
                                                          final String releaseYear) {
         return filter(entries, entry -> entry.matchesReleaseYear(releaseYear));
     }
@@ -110,7 +123,7 @@ public final class FilterUtils {
      * @param user    the user
      * @return the list
      */
-    public static List<LibraryEntry> filterByOwner(final List<LibraryEntry> entries,
+    public List<LibraryEntry> filterByOwner(final List<LibraryEntry> entries,
                                                    final String user) {
         return filter(entries, entry -> entry.matchesOwner(user));
     }
@@ -122,7 +135,7 @@ public final class FilterUtils {
      * @param description the description
      * @return the list
      */
-    public static List<LibraryEntry> filterByDescription(final List<LibraryEntry> entries,
+    public List<LibraryEntry> filterByDescription(final List<LibraryEntry> entries,
                                                          final String description) {
         return filter(entries, entry -> entry.matchesDescription(description));
     }
@@ -134,7 +147,7 @@ public final class FilterUtils {
      * @param user    the user
      * @return the list
      */
-    public static List<LibraryEntry> filterByPlaylistVisibility(final List<LibraryEntry> entries,
+    public List<LibraryEntry> filterByPlaylistVisibility(final List<LibraryEntry> entries,
                                                                 final String user) {
         return filter(entries, entry -> entry.isVisibleToUser(user));
     }
@@ -146,12 +159,12 @@ public final class FilterUtils {
      * @param followers the followers
      * @return the list
      */
-    public static List<LibraryEntry> filterByFollowers(final List<LibraryEntry> entries,
+    public List<LibraryEntry> filterByFollowers(final List<LibraryEntry> entries,
                                                        final String followers) {
         return filter(entries, entry -> entry.matchesFollowers(followers));
     }
 
-    private static List<LibraryEntry> filter(final List<LibraryEntry> entries,
+    private List<LibraryEntry> filter(final List<LibraryEntry> entries,
                                              final FilterCriteria criteria) {
         List<LibraryEntry> result = new ArrayList<>();
         for (LibraryEntry entry : entries) {

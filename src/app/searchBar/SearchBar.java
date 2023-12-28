@@ -9,19 +9,6 @@ import lombok.Getter;
 import java.util.ArrayList;
 import java.util.List;
 
-import static app.searchBar.FilterUtils.filterByAlbum;
-import static app.searchBar.FilterUtils.filterByArtist;
-import static app.searchBar.FilterUtils.filterByDescription;
-import static app.searchBar.FilterUtils.filterByFollowers;
-import static app.searchBar.FilterUtils.filterByGenre;
-import static app.searchBar.FilterUtils.filterByLyrics;
-import static app.searchBar.FilterUtils.filterByName;
-import static app.searchBar.FilterUtils.filterByOwner;
-import static app.searchBar.FilterUtils.filterByPlaylistVisibility;
-import static app.searchBar.FilterUtils.filterByReleaseYear;
-import static app.searchBar.FilterUtils.filterByTags;
-
-
 /**
  * The type Search bar.
  */
@@ -75,54 +62,56 @@ public final class SearchBar {
     public List<LibraryEntry> search(final Filters filters, final String type) {
         List<LibraryEntry> entries;
 
+        FilterUtils utils = FilterUtils.getInstance();
+
         switch (type) {
             case "song":
                 entries = new ArrayList<>(admin.getSongs());
 
                 if (filters.getName() != null) {
-                    entries = filterByName(entries, filters.getName());
+                    entries = utils.filterByName(entries, filters.getName());
                 }
 
                 if (filters.getAlbum() != null) {
-                    entries = filterByAlbum(entries, filters.getAlbum());
+                    entries = utils.filterByAlbum(entries, filters.getAlbum());
                 }
 
                 if (filters.getTags() != null) {
-                    entries = filterByTags(entries, filters.getTags());
+                    entries = utils.filterByTags(entries, filters.getTags());
                 }
 
                 if (filters.getLyrics() != null) {
-                    entries = filterByLyrics(entries, filters.getLyrics());
+                    entries = utils.filterByLyrics(entries, filters.getLyrics());
                 }
 
                 if (filters.getGenre() != null) {
-                    entries = filterByGenre(entries, filters.getGenre());
+                    entries = utils.filterByGenre(entries, filters.getGenre());
                 }
 
                 if (filters.getReleaseYear() != null) {
-                    entries = filterByReleaseYear(entries, filters.getReleaseYear());
+                    entries = utils.filterByReleaseYear(entries, filters.getReleaseYear());
                 }
 
                 if (filters.getArtist() != null) {
-                    entries = filterByArtist(entries, filters.getArtist());
+                    entries = utils.filterByArtist(entries, filters.getArtist());
                 }
 
                 break;
             case "playlist":
                 entries = new ArrayList<>(admin.getPlaylists());
 
-                entries = filterByPlaylistVisibility(entries, user);
+                entries = utils.filterByPlaylistVisibility(entries, user);
 
                 if (filters.getName() != null) {
-                    entries = filterByName(entries, filters.getName());
+                    entries = utils.filterByName(entries, filters.getName());
                 }
 
                 if (filters.getOwner() != null) {
-                    entries = filterByOwner(entries, filters.getOwner());
+                    entries = utils.filterByOwner(entries, filters.getOwner());
                 }
 
                 if (filters.getFollowers() != null) {
-                    entries = filterByFollowers(entries, filters.getFollowers());
+                    entries = utils.filterByFollowers(entries, filters.getFollowers());
                 }
 
                 break;
@@ -130,11 +119,11 @@ public final class SearchBar {
                 entries = new ArrayList<>(admin.getPodcasts());
 
                 if (filters.getName() != null) {
-                    entries = filterByName(entries, filters.getName());
+                    entries = utils.filterByName(entries, filters.getName());
                 }
 
                 if (filters.getOwner() != null) {
-                    entries = filterByOwner(entries, filters.getOwner());
+                    entries = utils.filterByOwner(entries, filters.getOwner());
                 }
 
                 break;
@@ -142,15 +131,15 @@ public final class SearchBar {
                 entries = new ArrayList<>(admin.getAlbums());
 
                 if (filters.getName() != null) {
-                    entries = filterByName(entries, filters.getName());
+                    entries = utils.filterByName(entries, filters.getName());
                 }
 
                 if (filters.getOwner() != null) {
-                    entries = filterByOwner(entries, filters.getOwner());
+                    entries = utils.filterByOwner(entries, filters.getOwner());
                 }
 
                 if (filters.getDescription() != null) {
-                    entries = filterByDescription(entries, filters.getDescription());
+                    entries = utils.filterByDescription(entries, filters.getDescription());
                 }
 
                 break;

@@ -349,7 +349,7 @@
   "timestamp" : 3629,
   "notifications" : [ {
     "name" : "New Album",
-    "description" : "New album from Chuck Berry."
+    "description" : "New Album from Chuck Berry."
   } ]
 }, {
   "command" : "addAlbum",
@@ -402,16 +402,16 @@
   "timestamp" : 8095,
   "notifications" : [ {
     "name" : "New Album",
-    "description" : "New album from Chuck Berry."
+    "description" : "New Album from Chuck Berry."
   }, {
     "name" : "New Merchandise",
     "description" : "New Merchandise from Elton John."
   }, {
     "name" : "New Album",
-    "description" : "New album from David Bowie."
+    "description" : "New Album from David Bowie."
   }, {
     "name" : "New Album",
-    "description" : "New album from David Bowie."
+    "description" : "New Album from David Bowie."
   } ]
 }, {
   "command" : "endProgram",

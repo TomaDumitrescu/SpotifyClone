@@ -199,7 +199,7 @@
     "topGenres" : { },
     "topSongs" : { },
     "topAlbums" : { },
-    "topPodcasts" : {
+    "topEpisodes" : {
       "The Power of Design" : 2,
       "Elon Musk Returns" : 1,
       "Ghosts" : 1,
@@ -216,8 +216,7 @@
       "The Power of Design" : 2,
       "The Science of Us" : 1
     },
-    "listeners" : 1,
-    "cities" : 1
+    "listeners" : 1
   }
 }, {
   "command" : "wrapped",
@@ -227,8 +226,7 @@
     "topEpisodes" : {
       "Ghosts" : 1
     },
-    "listeners" : 1,
-    "cities" : 1
+    "listeners" : 1
   }
 }, {
   "command" : "wrapped",
@@ -238,8 +236,7 @@
     "topEpisodes" : {
       "Elon Musk Returns" : 1
     },
-    "listeners" : 1,
-    "cities" : 1
+    "listeners" : 1
   }
 }, {
   "command" : "endProgram",

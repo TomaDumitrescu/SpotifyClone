@@ -679,7 +679,7 @@
   "timestamp" : 3726,
   "notifications" : [ {
     "name" : "New Album",
-    "description" : "New album from Madonna."
+    "description" : "New Album from Madonna."
   }, {
     "name" : "New Merchandise",
     "description" : "New Merchandise from Madonna."
@@ -740,19 +740,19 @@
   "timestamp" : 4811,
   "notifications" : [ {
     "name" : "New Album",
-    "description" : "New album from Bob Dylan."
+    "description" : "New Album from Bob Dylan."
   }, {
     "name" : "New Album",
-    "description" : "New album from Bob Dylan."
+    "description" : "New Album from Bob Dylan."
   }, {
     "name" : "New Merchandise",
     "description" : "New Merchandise from Fleetwood Mac."
   }, {
     "name" : "New Album",
-    "description" : "New album from Bob Dylan."
+    "description" : "New Album from Bob Dylan."
   }, {
     "name" : "New Album",
-    "description" : "New album from Joni Mitchell."
+    "description" : "New Album from Joni Mitchell."
   } ]
 }, {
   "command" : "getNotifications",
@@ -813,25 +813,25 @@
   "timestamp" : 6546,
   "notifications" : [ {
     "name" : "New Album",
-    "description" : "New album from Bob Dylan."
+    "description" : "New Album from Bob Dylan."
   }, {
     "name" : "New Album",
-    "description" : "New album from Bob Dylan."
+    "description" : "New Album from Bob Dylan."
   }, {
     "name" : "New Album",
-    "description" : "New album from The Doors."
+    "description" : "New Album from The Doors."
   }, {
     "name" : "New Album",
-    "description" : "New album from Eric Clapton."
+    "description" : "New Album from Eric Clapton."
   }, {
     "name" : "New Album",
-    "description" : "New album from Bob Dylan."
+    "description" : "New Album from Bob Dylan."
   }, {
     "name" : "New Merchandise",
     "description" : "New Merchandise from The Doors."
   }, {
     "name" : "New Album",
-    "description" : "New album from Bob Dylan."
+    "description" : "New Album from Bob Dylan."
   } ]
 }, {
   "command" : "getNotifications",
@@ -842,16 +842,16 @@
     "description" : "New Merchandise from Aretha Franklin."
   }, {
     "name" : "New Album",
-    "description" : "New album from Aretha Franklin."
+    "description" : "New Album from Aretha Franklin."
   }, {
     "name" : "New Album",
-    "description" : "New album from Aretha Franklin."
+    "description" : "New Album from Aretha Franklin."
   }, {
     "name" : "New Album",
-    "description" : "New album from James Brown."
+    "description" : "New Album from James Brown."
   }, {
     "name" : "New Album",
-    "description" : "New album from Frank Sinatra."
+    "description" : "New Album from Frank Sinatra."
   }, {
     "name" : "New Merchandise",
     "description" : "New Merchandise from James Brown."
@@ -920,16 +920,16 @@
     "description" : "New Merchandise from Nothing But Thieves."
   }, {
     "name" : "New Album",
-    "description" : "New album from Madonna."
+    "description" : "New Album from Madonna."
   }, {
     "name" : "New Album",
-    "description" : "New album from The Who."
+    "description" : "New Album from The Who."
   }, {
     "name" : "New Merchandise",
     "description" : "New Merchandise from The Police."
   }, {
     "name" : "New Album",
-    "description" : "New album from The Police."
+    "description" : "New Album from The Police."
   }, {
     "name" : "New Merchandise",
     "description" : "New Merchandise from Madonna."
@@ -938,19 +938,19 @@
     "description" : "New Merchandise from Madonna."
   }, {
     "name" : "New Album",
-    "description" : "New album from The Who."
+    "description" : "New Album from The Who."
   }, {
     "name" : "New Album",
-    "description" : "New album from The Who."
+    "description" : "New Album from The Who."
   }, {
     "name" : "New Album",
-    "description" : "New album from Madonna."
+    "description" : "New Album from Madonna."
   }, {
     "name" : "New Album",
-    "description" : "New album from Jay-Z."
+    "description" : "New Album from Jay-Z."
   }, {
     "name" : "New Album",
-    "description" : "New album from Jay-Z."
+    "description" : "New Album from Jay-Z."
   } ]
 }, {
   "command" : "removeAlbum",
@@ -1013,7 +1013,7 @@
   "timestamp" : 8769,
   "notifications" : [ {
     "name" : "New Album",
-    "description" : "New album from Madonna."
+    "description" : "New Album from Madonna."
   } ]
 }, {
   "command" : "addAlbum",
@@ -1041,10 +1041,10 @@
   "timestamp" : 9133,
   "notifications" : [ {
     "name" : "New Album",
-    "description" : "New album from The Police."
+    "description" : "New Album from The Police."
   }, {
     "name" : "New Album",
-    "description" : "New album from The Police."
+    "description" : "New Album from The Police."
   } ]
 }, {
   "command" : "removeAlbum",

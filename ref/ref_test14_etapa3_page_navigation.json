@@ -117,8 +117,8 @@
   "user" : "ghiu",
   "timestamp" : 165,
   "stats" : {
-    "name" : "We Will Rock You",
-    "remainedTime" : 112,
+    "name" : "Sad But True",
+    "remainedTime" : 314,
     "repeat" : "No Repeat",
     "shuffle" : false,
     "paused" : false
@@ -142,7 +142,7 @@
   "user" : "ghiu",
   "command" : "printCurrentPage",
   "timestamp" : 205,
-  "message" : "Liked songs:\n\t[Bohemian Rhapsody, We Will Rock You]\n\nFollowed playlists:\n\t[]\n\nSong recommendations:\n\t[We Will Rock You]\n\nPlaylists recommendations:\n\t[]"
+  "message" : "Liked songs:\n\t[Bohemian Rhapsody, Sad But True]\n\nFollowed playlists:\n\t[]\n\nSong recommendations:\n\t[Sad But True]\n\nPlaylists recommendations:\n\t[]"
 }, {
   "command" : "previousPage",
   "user" : "ghiu",
@@ -182,7 +182,7 @@
   "user" : "ghiu",
   "command" : "printCurrentPage",
   "timestamp" : 265,
-  "message" : "Liked songs:\n\t[Bohemian Rhapsody, We Will Rock You]\n\nFollowed playlists:\n\t[]\n\nSong recommendations:\n\t[We Will Rock You]\n\nPlaylists recommendations:\n\t[]"
+  "message" : "Liked songs:\n\t[Bohemian Rhapsody, Sad But True]\n\nFollowed playlists:\n\t[]\n\nSong recommendations:\n\t[Sad But True]\n\nPlaylists recommendations:\n\t[]"
 }, {
   "command" : "nextPage",
   "user" : "ghiu",
@@ -191,10 +191,16 @@
 }, {
   "command" : "endProgram",
   "result" : {
-    "Queen" : {
+    "Metallica" : {
       "merchRevenue" : 0.0,
       "songRevenue" : 0.0,
       "ranking" : 1,
+      "mostProfitableSong" : "N/A"
+    },
+    "Queen" : {
+      "merchRevenue" : 0.0,
+      "songRevenue" : 0.0,
+      "ranking" : 2,
       "mostProfitableSong" : "N/A"
     }
   }
