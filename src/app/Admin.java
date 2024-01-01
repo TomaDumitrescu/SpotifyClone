@@ -16,6 +16,7 @@ import app.user.UserAbstract;
 import app.user.Event;
 import app.user.Announcement;
 import app.user.Merchandise;
+import app.user.wrap.ArtistWrap;
 import app.user.wrap.UserWrap;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -892,18 +893,20 @@ public final class Admin {
         User user = getUser(command.getUsername());
         UserWrap userWrap = UserWrap.getInstance();
 
+        Artist artist = getArtist(command.getUsername());
+        ArtistWrap artistWrap = ArtistWrap.getInstance();
+
         if (user != null && user.getPlayer() != null) {
             userWrap.setRecordedEntries(user.getPlayer().getRecordedEntries());
             return userWrap.generateStatistics();
+        } else if (artist != null) {
+            artistWrap.setUsers(users);
+            return artistWrap.generateStatistics();
         }
 
-        if (user != null) {
-            message = "No data to show for user %s.".formatted(command.getUsername());
-        } else {
-            message = "Username %s does not exist.".formatted(command.getUsername());
-        }
+        message = "Username %s does not exist.".formatted(command.getUsername());
 
         objectNode.put("result", message);
-        return null;
+        return objectNode;
     }
 }

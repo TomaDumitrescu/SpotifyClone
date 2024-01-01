@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 public final class UserWrap implements Wrap {
     private static UserWrap instance = null;
     private HashMap<RecordedEntry, Integer> recordedEntries;
+    private String username;
     private final int topReference = 5;
 
     private UserWrap() {
@@ -66,70 +67,11 @@ public final class UserWrap implements Wrap {
             artists.put(rec.getCreator(), artists.getOrDefault(rec.getCreator(), 0) + listens);
         }
 
-        sortStringIntMaps(artists);
-        sortStringIntMaps(genres);
-        sortRecorded(songs);
-        sortRecorded(albums);
-        sortRecorded(episodes);
-    }
-
-    /**
-     * Sorting descending by value, then by key audio product name
-     *
-     * @param map the map with (String, Integer) entry
-     */
-    private void sortStringIntMaps(final LinkedHashMap<String, Integer> map) {
-        LinkedHashMap<String, Integer> orderedMap = map.entrySet()
-                .stream()
-                .sorted(Map.Entry.<String, Integer>comparingByValue(Comparator.reverseOrder())
-                        .thenComparing(Map.Entry::getKey))
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        Map.Entry::getValue,
-                        (obj1, obj2) -> obj1,
-                        LinkedHashMap::new
-                ));
-        map.clear();
-        map.putAll(orderedMap);
-
-        int len = map.size();
-        if (len > topReference) {
-            List<String> trashKeys = new ArrayList<>(map.keySet())
-                                    .subList(topReference, len);
-            for (String key: trashKeys) {
-                map.remove(key);
-            }
-        }
-    }
-
-    /**
-     * Sorting descending by value, then by key audio product name
-     *
-     * @param map the map with (RecordedEntry, Integer) entry
-     */
-    private void sortRecorded(final LinkedHashMap<RecordedEntry, Integer> map) {
-        LinkedHashMap<RecordedEntry, Integer> orderedMap = map.entrySet()
-                .stream()
-                .sorted(Map.Entry.
-                        <RecordedEntry, Integer>comparingByValue(Comparator.reverseOrder())
-                        .thenComparing(obj -> obj.getKey().getName()))
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        Map.Entry::getValue,
-                        (obj1, obj2) -> obj1,
-                        LinkedHashMap::new
-                ));
-        map.clear();
-        map.putAll(orderedMap);
-
-        int len = map.size();
-        if (len > topReference) {
-            List<RecordedEntry> trashKeys = new ArrayList<>(map.keySet())
-                                            .subList(topReference, len);
-            for (RecordedEntry key: trashKeys) {
-                map.remove(key);
-            }
-        }
+        sortStringIntMaps(artists, topReference);
+        sortStringIntMaps(genres, topReference);
+        sortRecorded(songs, topReference);
+        sortRecorded(albums, topReference);
+        sortRecorded(episodes, topReference);
     }
 
     /**
@@ -151,7 +93,7 @@ public final class UserWrap implements Wrap {
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
                         Map.Entry::getValue,
-                        (obj1, obj22) -> obj1,
+                        (obj1, obj2) -> obj1,
                         LinkedHashMap::new
                 ));
 
@@ -176,6 +118,12 @@ public final class UserWrap implements Wrap {
                 ));
 
         sortData(artists, genres, songs, albums, episodes);
+
+        if (emptyData(artists, genres, songs, albums, episodes)) {
+            String message = "No data to show for %s.".formatted(username);
+            result.put("result", message);
+            return result;
+        }
 
         LinkedHashMap<String, Integer> printData = new LinkedHashMap<>(artists);
         result.set("topArtists", objectMapper.valueToTree(printData));
@@ -204,5 +152,24 @@ public final class UserWrap implements Wrap {
         printData.clear();
 
         return result;
+    }
+
+    /**
+     * Calculates the length of each linked hash maps
+     *
+     * @param artists the artists
+     * @param genres the genres
+     * @param songs the songs
+     * @param albums the albums
+     * @param episodes the episodes
+     * @return true if there are statistics about the user to show
+     */
+    boolean emptyData(final LinkedHashMap<String, Integer> artists,
+                      final LinkedHashMap<String, Integer> genres,
+                      final LinkedHashMap<RecordedEntry, Integer> songs,
+                      final LinkedHashMap<RecordedEntry, Integer> albums,
+                      final LinkedHashMap<RecordedEntry, Integer> episodes) {
+        return artists.isEmpty() && genres.isEmpty() && songs.isEmpty()
+                && albums.isEmpty() && episodes.isEmpty();
     }
 }
