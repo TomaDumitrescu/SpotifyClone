@@ -16,6 +16,9 @@ import app.user.UserAbstract;
 import app.user.Event;
 import app.user.Announcement;
 import app.user.Merchandise;
+import app.user.wrap.UserWrap;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import fileio.input.CommandInput;
 import fileio.input.EpisodeInput;
 import fileio.input.PodcastInput;
@@ -873,5 +876,34 @@ public final class Admin {
             count++;
         }
         return topPlaylists;
+    }
+
+    /**
+     * Calls methods from the wrap classes to generate statistics
+     *
+     * @param command the command
+     * @return the object node
+     */
+    public ObjectNode wrapped(final CommandInput command) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        ObjectNode objectNode = objectMapper.createObjectNode();
+        String message;
+
+        User user = getUser(command.getUsername());
+        UserWrap userWrap = UserWrap.getInstance();
+
+        if (user != null && user.getPlayer() != null) {
+            userWrap.setRecordedEntries(user.getPlayer().getRecordedEntries());
+            return userWrap.generateStatistics();
+        }
+
+        if (user != null) {
+            message = "No data to show for user %s.".formatted(command.getUsername());
+        } else {
+            message = "Username %s does not exist.".formatted(command.getUsername());
+        }
+
+        objectNode.put("result", message);
+        return null;
     }
 }

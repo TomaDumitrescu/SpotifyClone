@@ -1,7 +1,6 @@
 package app.pages;
 
 import app.audio.Collections.Album;
-import app.user.Artist;
 import app.user.Event;
 import app.user.Merchandise;
 
@@ -18,12 +17,15 @@ public final class ArtistPage implements Page {
     /**
      * Instantiates a new Artist page.
      *
-     * @param artist the artist
+     * @param albums the albums
+     * @param merch the merch
+     * @param events the events
      */
-    public ArtistPage(final Artist artist) {
-        albums = artist.getAlbums();
-        merch = artist.getMerch();
-        events = artist.getEvents();
+    public ArtistPage(final List<Album> albums, final List<Merchandise> merch,
+                      final List<Event> events) {
+        this.albums = albums;
+        this.merch = merch;
+        this.events = events;
     }
 
     @Override

@@ -2,7 +2,6 @@ package app.pages;
 
 import app.audio.Collections.Podcast;
 import app.user.Announcement;
-import app.user.Host;
 
 import java.util.List;
 
@@ -16,11 +15,13 @@ public final class HostPage implements Page {
     /**
      * Instantiates a new Host page.
      *
-     * @param host the host
+     * @param podcasts the podcasts
+     * @param announcements the announcements
      */
-    public HostPage(final Host host) {
-        podcasts = host.getPodcasts();
-        announcements = host.getAnnouncements();
+    public HostPage(final List<Podcast> podcasts,
+                    final List<Announcement> announcements) {
+        this.podcasts = podcasts;
+        this.announcements = announcements;
     }
 
     @Override

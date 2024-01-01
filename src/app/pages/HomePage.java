@@ -2,7 +2,6 @@ package app.pages;
 
 import app.audio.Collections.Playlist;
 import app.audio.Files.Song;
-import app.user.User;
 
 import java.util.Comparator;
 import java.util.List;
@@ -18,11 +17,12 @@ public final class HomePage implements Page {
     /**
      * Instantiates a new Home page.
      *
-     * @param user the user
+     * @param songs the songs
+     * @param playlists the playlists
      */
-    public HomePage(final User user) {
-        likedSongs = user.getLikedSongs();
-        followedPlaylists = user.getFollowedPlaylists();
+    public HomePage(final List<Song> songs, final List<Playlist> playlists) {
+        likedSongs = songs;
+        followedPlaylists = playlists;
     }
 
     @Override

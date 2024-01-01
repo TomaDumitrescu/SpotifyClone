@@ -29,7 +29,7 @@ public final class Host extends ContentCreator {
         podcasts = new ArrayList<>();
         announcements = new ArrayList<>();
 
-        super.setPage(new HostPage(this));
+        super.setPage(new HostPage(getPodcasts(), getAnnouncements()));
     }
 
     /**

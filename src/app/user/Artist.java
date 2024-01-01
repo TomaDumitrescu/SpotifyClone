@@ -6,8 +6,9 @@ import java.util.List;
 import app.audio.Collections.Album;
 import app.audio.Collections.AlbumOutput;
 import app.audio.Files.Song;
-import app.pages.ArtistPage;
+//import app.pages.ArtistPage;
 
+import app.pages.ArtistPage;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -34,7 +35,7 @@ public final class Artist extends ContentCreator {
         merch = new ArrayList<>();
         events = new ArrayList<>();
 
-        super.setPage(new ArtistPage(this));
+        super.setPage(new ArtistPage(getAlbums(), getMerch(), getEvents()));
     }
 
     /**

@@ -5,10 +5,7 @@ import app.audio.Files.AudioFile;
 import app.utils.Enums;
 import lombok.Getter;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 /**
  * The type Player source.
@@ -199,16 +196,20 @@ public class PlayerSource {
      * Skip.
      *
      * @param duration the duration
+     * @return true if the audio file is changed
      */
-    public void skip(final int duration) {
+    public boolean skip(final int duration) {
         remainedDuration += duration;
         if (remainedDuration > audioFile.getDuration()) {
             remainedDuration = 0;
             index++;
             updateAudioFile();
+            return true;
         } else if (remainedDuration < 0) {
             remainedDuration = 0;
         }
+
+        return false;
     }
 
     private void updateAudioFile() {
@@ -223,5 +224,4 @@ public class PlayerSource {
     public void setAudioFile(final AudioFile audioFile) {
         this.audioFile = audioFile;
     }
-
 }

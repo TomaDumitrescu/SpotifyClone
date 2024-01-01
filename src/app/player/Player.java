@@ -1,12 +1,19 @@
 package app.player;
 
+import app.audio.Collections.Album;
 import app.audio.Collections.AudioCollection;
+import app.audio.Collections.Playlist;
+import app.audio.Collections.Podcast;
 import app.audio.Files.AudioFile;
+import app.audio.Files.Episode;
+import app.audio.Files.Song;
 import app.audio.LibraryEntry;
+import app.audio.RecordedEntry;
 import app.utils.Enums;
 import lombok.Getter;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -21,8 +28,9 @@ public final class Player {
     @Getter
     private String type;
     private final int skipTime = 90;
-
     private ArrayList<PodcastBookmark> bookmarks = new ArrayList<>();
+    @Getter
+    private HashMap<RecordedEntry, Integer> recordedEntries = new HashMap<>();
 
 
     /**
@@ -105,6 +113,10 @@ public final class Player {
 
         this.type = sourceType;
         this.source = createSource(sourceType, entry, bookmarks);
+
+        addRecord(true);
+        addRecord(false);
+
         this.repeatMode = Enums.RepeatMode.NO_REPEAT;
         this.shuffle = false;
         this.paused = true;
@@ -170,10 +182,12 @@ public final class Player {
      */
     public void simulatePlayer(final int time) {
         int elapsedTime = time;
+
         if (!paused) {
             while (elapsedTime >= source.getDuration()) {
                 elapsedTime -= source.getDuration();
                 next();
+
                 if (paused) {
                     break;
                 }
@@ -195,6 +209,9 @@ public final class Player {
 
         if (source.getDuration() == 0 && paused) {
             stop();
+        } else {
+            addRecord(true);
+            addRecord(false);
         }
     }
 
@@ -203,11 +220,18 @@ public final class Player {
      */
     public void prev() {
         source.setPrevAudioFile(shuffle);
+        addRecord(true);
+        addRecord(false);
         paused = false;
     }
 
     private void skip(final int duration) {
-        source.skip(duration);
+        boolean changed = source.skip(duration);
+        if (changed) {
+            addRecord(true);
+            addRecord(false);
+        }
+
         paused = false;
     }
 
@@ -287,5 +311,75 @@ public final class Player {
         }
 
         return new PlayerStats(filename, duration, repeatMode, shuffle, paused);
+    }
+
+    /**
+     * Adds a recorded entry to the list
+     *
+     * @param collection if the entry is collection or file
+     */
+    public void addRecord(final boolean collection) {
+        if (source == null) {
+            return;
+        }
+
+        RecordedEntry rec;
+
+        if (collection) {
+            AudioCollection current = getCurrentAudioCollection();
+
+            if (current == null) {
+                return;
+            }
+
+            String productType;
+            if (Album.class.isAssignableFrom(current.getClass())) {
+                productType = "album";
+            } else if (Podcast.class.isAssignableFrom(current.getClass())) {
+                productType = "podcast";
+            } else {
+                if (!Playlist.class.isAssignableFrom(current.getClass())) {
+                    throw new RuntimeException("Error. No valid audio collection type!");
+                }
+
+                productType = "playlist";
+            }
+
+            rec = new RecordedEntry(current.getName(), current.getOwner(), productType);
+            recordedEntries.put(rec, recordedEntries.getOrDefault(rec, 0) + 1);
+
+            return;
+        }
+
+        AudioFile current = getCurrentAudioFile();
+        if (current == null) {
+            return;
+        }
+
+        if (Song.class.isAssignableFrom(current.getClass())) {
+            Song song = (Song) current;
+            rec = new RecordedEntry(song.getName(), song.getArtist(), "song");
+            rec.setGenre(song.getGenre());
+            recordedEntries.put(rec, recordedEntries.getOrDefault(rec, 0) + 1);
+
+            if (getCurrentAudioCollection() == null) {
+                rec = new RecordedEntry(song.getAlbum(), song.getArtist(), "album");
+                recordedEntries.put(rec, recordedEntries.getOrDefault(rec, 0) + 1);
+            }
+        } else  {
+            if (!Episode.class.isAssignableFrom(current.getClass())) {
+                throw new RuntimeException("Error. No valid audio file type!");
+            }
+
+            Episode episode = (Episode) current;
+            Podcast podcast = (Podcast) getCurrentAudioCollection();
+
+            if (podcast == null) {
+                throw new RuntimeException("Error. No podcast for the episode!");
+            }
+
+            rec = new RecordedEntry(episode.getName(), podcast.getOwner(), "episode");
+            recordedEntries.put(rec, recordedEntries.getOrDefault(rec, 0) + 1);
+        }
     }
 }

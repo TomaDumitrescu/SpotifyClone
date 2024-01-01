@@ -63,9 +63,9 @@ public final class User extends UserAbstract {
         lastSearched = false;
         status = true;
 
-        homePage = new HomePage(this);
+        homePage = new HomePage(getLikedSongs(), getFollowedPlaylists());
         currentPage = homePage;
-        likedContentPage = new LikedContentPage(this);
+        likedContentPage = new LikedContentPage(getLikedSongs(), getFollowedPlaylists());
     }
 
     @Override

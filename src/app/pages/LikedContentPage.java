@@ -2,7 +2,6 @@ package app.pages;
 
 import app.audio.Collections.Playlist;
 import app.audio.Files.Song;
-import app.user.User;
 
 import java.util.List;
 
@@ -22,11 +21,13 @@ public final class LikedContentPage implements Page {
     /**
      * Instantiates a new Liked content page.
      *
-     * @param user the user
+     * @param songs the songs
+     * @param playlists the playlists
      */
-    public LikedContentPage(final User user) {
-        likedSongs = user.getLikedSongs();
-        followedPlaylists = user.getFollowedPlaylists();
+    public LikedContentPage(final List<Song> songs,
+                            final List<Playlist> playlists) {
+        likedSongs = songs;
+        followedPlaylists = playlists;
     }
 
     @Override

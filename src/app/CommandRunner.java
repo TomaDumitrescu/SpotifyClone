@@ -782,4 +782,22 @@ public final class CommandRunner {
 
         return objectNode;
     }
+
+    /**
+     * Prints statistics based on some user activity
+     *
+     * @param commandInput the command input
+     * @return the object node (message or complex data structure)
+     */
+    public static ObjectNode wrapped(final CommandInput commandInput) {
+        ObjectNode result = admin.wrapped(commandInput);
+
+        ObjectNode objectNode = objectMapper.createObjectNode();
+        objectNode.put("command", commandInput.getCommand());
+        objectNode.put("user", commandInput.getUsername());
+        objectNode.put("timestamp", commandInput.getTimestamp());
+        objectNode.put("result", result);
+
+        return objectNode;
+    }
 }

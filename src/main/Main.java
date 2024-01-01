@@ -75,8 +75,9 @@ public final class Main {
                                                                + "library/library.json"),
                                                                LibraryInput.class);
         CommandInput[] commands = objectMapper.readValue(new File(CheckerConstants.TESTS_PATH
-                                                                  + filePath1),
+                                                                  + "test00_etapa3_wrapped_one_user_one_artist.json"),
                                                                   CommandInput[].class);
+        // filePath1
         ArrayNode outputs = objectMapper.createArrayNode();
 
         Admin admin = Admin.getInstance();
@@ -136,6 +137,18 @@ public final class Main {
                 case "getOnlineUsers" -> outputs.add(CommandRunner.getOnlineUsers(command));
                 case "showAlbums" -> outputs.add(CommandRunner.showAlbums(command));
                 case "showPodcasts" -> outputs.add(CommandRunner.showPodcasts(command));
+                case "wrapped" -> outputs.add(CommandRunner.wrapped(command));
+                case "buyPremium" -> outputs.add("");
+                case "cancelPremium" -> outputs.add("");
+                case "adBreak" -> outputs.add("");
+                case "subscribe" -> outputs.add("");
+                case "getNotifications" -> outputs.add("");
+                case "buyMerch" -> outputs.add("");
+                case "seeMerch" -> outputs.add("");
+                case "updateRecommendations" -> outputs.add("");
+                case "previousPage" -> outputs.add("");
+                case "loadRecommendations" -> outputs.add("");
+                case "nextPage" -> outputs.add("");
                 default -> System.out.println("Invalid command " + commandName);
             }
         }
