@@ -5,11 +5,16 @@ import lombok.Setter;
 
 import java.util.Objects;
 
-@Getter
-@Setter
+
 public class RecordedEntry extends LibraryEntry {
+    @Getter
+    @Setter
     private String creator;
+    @Getter
+    @Setter
     private String type;
+    @Getter
+    @Setter
     private String genre;
 
     /**
@@ -33,8 +38,12 @@ public class RecordedEntry extends LibraryEntry {
      */
     @Override
     public boolean equals(final Object o) {
-        if (this == o) { return true; }
-        if (o == null || getClass() != o.getClass()) { return false; }
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         RecordedEntry cmp = (RecordedEntry) o;
         return getName().equalsIgnoreCase(cmp.getName())

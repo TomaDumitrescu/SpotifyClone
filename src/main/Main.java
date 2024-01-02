@@ -75,7 +75,7 @@ public final class Main {
                                                                + "library/library.json"),
                                                                LibraryInput.class);
         CommandInput[] commands = objectMapper.readValue(new File(CheckerConstants.TESTS_PATH
-                                                                  + "test00_etapa3_wrapped_one_user_one_artist.json"),
+                                                                  + filePath1),
                                                                   CommandInput[].class);
         // filePath1
         ArrayNode outputs = objectMapper.createArrayNode();
@@ -152,6 +152,8 @@ public final class Main {
                 default -> System.out.println("Invalid command " + commandName);
             }
         }
+
+        outputs.add(admin.endProgram());
 
         ObjectWriter objectWriter = objectMapper.writerWithDefaultPrettyPrinter();
         objectWriter.writeValue(new File(filePath2), outputs);

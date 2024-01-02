@@ -790,13 +790,18 @@ public final class CommandRunner {
      * @return the object node (message or complex data structure)
      */
     public static ObjectNode wrapped(final CommandInput commandInput) {
-        ObjectNode result = admin.wrapped(commandInput);
+        StringBuilder format = new StringBuilder();
+        ObjectNode result = admin.wrapped(commandInput, format);
 
         ObjectNode objectNode = objectMapper.createObjectNode();
         objectNode.put("command", commandInput.getCommand());
         objectNode.put("user", commandInput.getUsername());
         objectNode.put("timestamp", commandInput.getTimestamp());
-        objectNode.put("result", result);
+        if (format.toString().equals("result")) {
+            objectNode.put("result", result);
+        } else {
+            objectNode.put("message", format.toString());
+        }
 
         return objectNode;
     }

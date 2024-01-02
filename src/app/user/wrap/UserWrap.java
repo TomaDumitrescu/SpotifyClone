@@ -7,9 +7,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -120,9 +117,7 @@ public final class UserWrap implements Wrap {
         sortData(artists, genres, songs, albums, episodes);
 
         if (emptyData(artists, genres, songs, albums, episodes)) {
-            String message = "No data to show for %s.".formatted(username);
-            result.put("result", message);
-            return result;
+            return null;
         }
 
         LinkedHashMap<String, Integer> printData = new LinkedHashMap<>(artists);

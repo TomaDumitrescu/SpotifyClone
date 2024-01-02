@@ -8,7 +8,11 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.*;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @Getter
 @Setter
@@ -40,15 +44,17 @@ public final class ArtistWrap implements Wrap {
      * @param topSongs the songs hashmap
      * @return the total number of listens from the user in iteration
      */
-    public int insertSongs(HashMap<RecordedEntry, Integer> currentUserRec,
-                           LinkedHashMap<RecordedEntry, Integer> topSongs) {
+    public int insertSongs(final HashMap<RecordedEntry, Integer> currentUserRec,
+                           final LinkedHashMap<RecordedEntry, Integer> topSongs) {
         int currentListens = 0;
 
         for (Map.Entry<RecordedEntry, Integer> rec: currentUserRec.entrySet()) {
             RecordedEntry recorded = rec.getKey();
-            if (recorded.getType().equalsIgnoreCase("song")) {
+            if (recorded.getType().equalsIgnoreCase("song")
+                && recorded.getCreator().equalsIgnoreCase(username)) {
                 currentListens += rec.getValue();
-                topSongs.put(rec.getKey(), rec.getValue());
+                topSongs.put(rec.getKey(),
+                        topSongs.getOrDefault(rec.getKey(), 0) + rec.getValue());
             }
         }
 
@@ -61,19 +67,28 @@ public final class ArtistWrap implements Wrap {
      * @param currentUserRec the recorded entries for the user in iteration
      * @param topAlbums the albums hashmap
      */
-    public void insertAlbums(HashMap<RecordedEntry, Integer> currentUserRec,
-                           LinkedHashMap<RecordedEntry, Integer> topAlbums) {
+    public void insertAlbums(final HashMap<RecordedEntry, Integer> currentUserRec,
+                             final LinkedHashMap<RecordedEntry, Integer> topAlbums) {
         for (Map.Entry<RecordedEntry, Integer> rec: currentUserRec.entrySet()) {
             RecordedEntry recorded = rec.getKey();
-            if (recorded.getType().equalsIgnoreCase("album")) {
-                topAlbums.put(rec.getKey(), rec.getValue());
+            if (recorded.getType().equalsIgnoreCase("album")
+                && recorded.getCreator().equalsIgnoreCase(username)) {
+                topAlbums.put(rec.getKey(),
+                        topAlbums.getOrDefault(rec.getKey(), 0) + rec.getValue());
             }
         }
     }
 
-    public void sortData(LinkedHashMap<RecordedEntry, Integer> topAlbums,
-                         LinkedHashMap<RecordedEntry, Integer> topSongs,
-                         LinkedHashMap<String, Integer> topUsers) {
+    /**
+     * Sorts the data using default methods from Wrap interface
+     *
+     * @param topAlbums the albums from that artist
+     * @param topSongs the songs from the albums
+     * @param topUsers the users that listened the artist
+     */
+    public void sortData(final LinkedHashMap<RecordedEntry, Integer> topAlbums,
+                         final LinkedHashMap<RecordedEntry, Integer> topSongs,
+                         final LinkedHashMap<String, Integer> topUsers) {
 
         sortRecorded(topAlbums, topReference);
         sortRecorded(topSongs, topReference);
@@ -100,9 +115,7 @@ public final class ArtistWrap implements Wrap {
 
         for (User user: users) {
             currentListens = 0;
-            if (user.getPlayer() == null) {
-                continue;
-            }
+
             currentUserRec = user.getPlayer().getRecordedEntries();
             currentListens += insertSongs(currentUserRec, topSongs);
             insertAlbums(currentUserRec, topAlbums);
@@ -116,9 +129,7 @@ public final class ArtistWrap implements Wrap {
         sortData(topAlbums, topSongs, topUsers);
 
         if (emptyData(topSongs, topAlbums, topUsers)) {
-            String message = "No data to show for %s.".formatted(username);
-            result.put("result", message);
-            return result;
+            return null;
         }
 
         LinkedHashMap<String, Integer> printSongs = new LinkedHashMap<>();
@@ -148,14 +159,14 @@ public final class ArtistWrap implements Wrap {
     /**
      * Calculates the length of the maps songs, albums and users
      *
-     * @param songs the songs
-     * @param albums the albums
-     * @param users the users
+     * @param topSongs the songs
+     * @param topAlbums the albums
+     * @param topUsers the users
      * @return true if there are statistics to show for the artist
      */
-    boolean emptyData(final LinkedHashMap<RecordedEntry, Integer> songs,
-                      final LinkedHashMap<RecordedEntry, Integer> albums,
-                      final LinkedHashMap<String, Integer> users) {
-        return songs.isEmpty() && albums.isEmpty() && users.isEmpty();
+    boolean emptyData(final LinkedHashMap<RecordedEntry, Integer> topSongs,
+                      final LinkedHashMap<RecordedEntry, Integer> topAlbums,
+                      final LinkedHashMap<String, Integer> topUsers) {
+        return topSongs.isEmpty() && topAlbums.isEmpty() && topUsers.isEmpty();
     }
 }

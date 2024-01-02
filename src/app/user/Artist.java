@@ -21,6 +21,11 @@ public final class Artist extends ContentCreator {
     private ArrayList<Album> albums;
     private ArrayList<Merchandise> merch;
     private ArrayList<Event> events;
+    private double songRevenue;
+    private double merchRevenue;
+    private int ranking;
+    private String mostProfitableSong;
+    private int listens;
 
     /**
      * Instantiates a new Artist.
@@ -34,6 +39,11 @@ public final class Artist extends ContentCreator {
         albums = new ArrayList<>();
         merch = new ArrayList<>();
         events = new ArrayList<>();
+        songRevenue = 0;
+        merchRevenue = 0;
+        ranking = 1;
+        mostProfitableSong = "N/A";
+        listens = 0;
 
         super.setPage(new ArtistPage(getAlbums(), getMerch(), getEvents()));
     }

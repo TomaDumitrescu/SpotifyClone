@@ -89,7 +89,7 @@ public final class User extends UserAbstract {
 
         if (type.equals("artist") || type.equals("host")) {
             List<ContentCreator> contentCreatorsEntries =
-            searchBar.searchContentCreator(filters, type);
+                    searchBar.searchContentCreator(filters, type);
 
             for (ContentCreator contentCreator : contentCreatorsEntries) {
                 results.add(contentCreator.getUsername());

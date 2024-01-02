@@ -17,6 +17,7 @@ import app.user.Event;
 import app.user.Announcement;
 import app.user.Merchandise;
 import app.user.wrap.ArtistWrap;
+import app.user.wrap.HostWrap;
 import app.user.wrap.UserWrap;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -26,16 +27,17 @@ import fileio.input.PodcastInput;
 import fileio.input.SongInput;
 import fileio.input.UserInput;
 import lombok.Getter;
+import lombok.Setter;
 
+import java.util.List;
 import java.util.ArrayList;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -45,6 +47,7 @@ import java.util.stream.Stream;
 public final class Admin {
     private List<User> users = new ArrayList<>();
     @Getter
+    @Setter
     private List<Artist> artists = new ArrayList<>();
     @Getter
     private List<Host> hosts = new ArrayList<>();
@@ -61,6 +64,7 @@ public final class Admin {
     private final int dateDayLowerLimit = 1;
     private final int dateDayHigherLimit = 31;
     private final int dateFebHigherLimit = 28;
+    private final double roundTool = 100.0;
     private static Admin instance;
 
     private Admin() {
@@ -885,10 +889,9 @@ public final class Admin {
      * @param command the command
      * @return the object node
      */
-    public ObjectNode wrapped(final CommandInput command) {
+    public ObjectNode wrapped(final CommandInput command, final StringBuilder message) {
         ObjectMapper objectMapper = new ObjectMapper();
         ObjectNode objectNode = objectMapper.createObjectNode();
-        String message;
 
         User user = getUser(command.getUsername());
         UserWrap userWrap = UserWrap.getInstance();
@@ -896,17 +899,82 @@ public final class Admin {
         Artist artist = getArtist(command.getUsername());
         ArtistWrap artistWrap = ArtistWrap.getInstance();
 
+        Host host = getHost(command.getUsername());
+        HostWrap hostWrap = HostWrap.getInstance();
+
         if (user != null && user.getPlayer() != null) {
             userWrap.setRecordedEntries(user.getPlayer().getRecordedEntries());
-            return userWrap.generateStatistics();
+            objectNode = userWrap.generateStatistics();
         } else if (artist != null) {
             artistWrap.setUsers(users);
-            return artistWrap.generateStatistics();
+            artistWrap.setUsername(artist.getUsername());
+            objectNode = artistWrap.generateStatistics();
+        } else if (host != null) {
+            hostWrap.setUsers(users);
+            hostWrap.setUsername(host.getUsername());
+            objectNode = hostWrap.generateStatistics();
         }
 
-        message = "Username %s does not exist.".formatted(command.getUsername());
+        if (user == null && artist == null && host == null) {
+            message.append("Username %s does not exist.".formatted(command.getUsername()));
+        } else if (objectNode == null) {
+            message.append("No data to show for user %s.".formatted(command.getUsername()));
+        } else {
+            message.append("result");
+        }
 
-        objectNode.put("result", message);
+        return objectNode;
+    }
+
+    /**
+     * Updates the lists with delete and sort operations
+     *
+     * @param activeArtists the empty set
+     */
+    public void setActiveArtists(final ArrayList<Artist> activeArtists) {
+        for (Artist artist: artists) {
+            if (artist.getListens() > 0) {
+                activeArtists.add(artist);
+            }
+        }
+
+        activeArtists.sort(Comparator.comparing(Artist::getUsername));
+
+        int rank = 1;
+        for (Artist artist: activeArtists) {
+            artist.setRanking(rank++);
+        }
+    }
+
+    /**
+     * Statistics performed on content creators at the end of the program
+     *
+     * @return the object node
+     */
+    public ObjectNode endProgram() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        ObjectNode objectNode = objectMapper.createObjectNode(), iter;
+        ObjectNode resultNode = objectMapper.createObjectNode();
+
+        objectNode.put("command", "endProgram");
+
+        ArrayList<Artist> activeArtists = new ArrayList<>();
+        setActiveArtists(activeArtists);
+
+        for (Artist artist: activeArtists) {
+            iter = objectMapper.createObjectNode();
+            iter.put("merchRevenue",
+                    Math.round(artist.getMerchRevenue() * roundTool) / roundTool);
+            iter.put("songRevenue",
+                    Math.round(artist.getSongRevenue() * roundTool) / roundTool);
+            iter.put("ranking", artist.getRanking());
+            iter.put("mostProfitableSong", artist.getMostProfitableSong());
+
+            resultNode.set(artist.getUsername(), iter);
+        }
+
+        objectNode.put("result", resultNode);
+
         return objectNode;
     }
 }

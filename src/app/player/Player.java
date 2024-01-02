@@ -1,5 +1,6 @@
 package app.player;
 
+import app.Admin;
 import app.audio.Collections.Album;
 import app.audio.Collections.AudioCollection;
 import app.audio.Collections.Playlist;
@@ -9,6 +10,7 @@ import app.audio.Files.Episode;
 import app.audio.Files.Song;
 import app.audio.LibraryEntry;
 import app.audio.RecordedEntry;
+import app.user.Artist;
 import app.utils.Enums;
 import lombok.Getter;
 
@@ -114,8 +116,7 @@ public final class Player {
         this.type = sourceType;
         this.source = createSource(sourceType, entry, bookmarks);
 
-        addRecord(true);
-        addRecord(false);
+        addRecord();
 
         this.repeatMode = Enums.RepeatMode.NO_REPEAT;
         this.shuffle = false;
@@ -210,8 +211,7 @@ public final class Player {
         if (source.getDuration() == 0 && paused) {
             stop();
         } else {
-            addRecord(true);
-            addRecord(false);
+            addRecord();
         }
     }
 
@@ -220,16 +220,14 @@ public final class Player {
      */
     public void prev() {
         source.setPrevAudioFile(shuffle);
-        addRecord(true);
-        addRecord(false);
+        addRecord();
         paused = false;
     }
 
     private void skip(final int duration) {
         boolean changed = source.skip(duration);
         if (changed) {
-            addRecord(true);
-            addRecord(false);
+            addRecord();
         }
 
         paused = false;
@@ -314,11 +312,11 @@ public final class Player {
     }
 
     /**
-     * Adds a recorded entry to the list
+     * Sets a recorded entry to the list
      *
      * @param collection if the entry is collection or file
      */
-    public void addRecord(final boolean collection) {
+    public void setRecord(final boolean collection) {
         if (source == null) {
             return;
         }
@@ -360,6 +358,14 @@ public final class Player {
             Song song = (Song) current;
             rec = new RecordedEntry(song.getName(), song.getArtist(), "song");
             rec.setGenre(song.getGenre());
+            List<Artist> artists = Admin.getInstance().getArtists();
+            for (Artist artist: artists) {
+                if (artist.getUsername().equalsIgnoreCase(song.getArtist())) {
+                    artist.setListens(artist.getListens() + 2);
+                    break;
+                }
+            }
+            Admin.getInstance().setArtists(artists);
             recordedEntries.put(rec, recordedEntries.getOrDefault(rec, 0) + 1);
 
             if (getCurrentAudioCollection() == null) {
@@ -381,5 +387,14 @@ public final class Player {
             rec = new RecordedEntry(episode.getName(), podcast.getOwner(), "episode");
             recordedEntries.put(rec, recordedEntries.getOrDefault(rec, 0) + 1);
         }
+    }
+
+    /**
+     * Adds a recorded entry to the list, each object listened from a collection
+     * incrementing the collection listens
+     */
+    public void addRecord() {
+        setRecord(true);
+        setRecord(false);
     }
 }
