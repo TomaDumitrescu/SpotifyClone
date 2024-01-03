@@ -6,15 +6,11 @@ import lombok.Setter;
 import java.util.Objects;
 
 
+@Getter
+@Setter
 public class RecordedEntry extends LibraryEntry {
-    @Getter
-    @Setter
     private String creator;
-    @Getter
-    @Setter
     private String type;
-    @Getter
-    @Setter
     private String genre;
 
     /**

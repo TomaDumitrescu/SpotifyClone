@@ -145,7 +145,8 @@ public final class Main {
                 case "getNotifications" -> outputs.add("");
                 case "buyMerch" -> outputs.add("");
                 case "seeMerch" -> outputs.add("");
-                case "updateRecommendations" -> outputs.add("");
+                case "updateRecommendations" -> outputs.add(CommandRunner
+                                                .updateRecommendations(command));
                 case "previousPage" -> outputs.add("");
                 case "loadRecommendations" -> outputs.add("");
                 case "nextPage" -> outputs.add("");

@@ -19,6 +19,12 @@ import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Comparator;
+import java.util.stream.Collectors;
 
 /**
  * The type User.
@@ -26,6 +32,10 @@ import java.util.List;
 public final class User extends UserAbstract {
     @Getter
     private ArrayList<Playlist> playlists;
+    @Getter
+    private ArrayList<Song> songRecommendations;
+    @Getter
+    private ArrayList<Playlist> playlistRecommendations;
     @Getter
     private ArrayList<Song> likedSongs;
     @Getter
@@ -41,10 +51,18 @@ public final class User extends UserAbstract {
     private Page currentPage;
     @Getter
     @Setter
+    private Page previousPage;
+    @Getter
+    @Setter
     private HomePage homePage;
     @Getter
     @Setter
     private LikedContentPage likedContentPage;
+    private final int audioSeed = 30;
+    private final int topRecommended = 3;
+    private final int randSongsFirstGenre = 5;
+    private final int randSongsSecondGenre = 3;
+    private final int randSongsThirdGenre = 2;
 
     /**
      * Instantiates a new User.
@@ -57,6 +75,8 @@ public final class User extends UserAbstract {
         super(username, age, city);
         playlists = new ArrayList<>();
         likedSongs = new ArrayList<>();
+        songRecommendations = new ArrayList<>();
+        playlistRecommendations = new ArrayList<>();
         followedPlaylists = new ArrayList<>();
         player = new Player();
         searchBar = new SearchBar(username);
@@ -65,6 +85,7 @@ public final class User extends UserAbstract {
 
         homePage = new HomePage(getLikedSongs(), getFollowedPlaylists());
         currentPage = homePage;
+        previousPage = null;
         likedContentPage = new LikedContentPage(getLikedSongs(), getFollowedPlaylists());
     }
 
@@ -588,5 +609,175 @@ public final class User extends UserAbstract {
         }
 
         player.simulatePlayer(time);
+    }
+
+    /**
+     * Updates the recommendations for this user
+     *
+     * @param recommend the recommendation type
+     * @param songs the admin list of songs
+     */
+    public void updateRecommendations(final String recommend,
+                                      final List<Song> songs) {
+        switch (recommend) {
+            case "random_song" -> recommendSong(songs);
+            case "random_playlist" -> recommendPlaylist(songs);
+            default -> { }
+        }
+    }
+
+    /**
+     * Adds to the list of recommended songs
+     *
+     * @param songs the admin list of songs
+     */
+    private void recommendSong(final List<Song> songs) {
+        AudioFile current = player.getCurrentAudioFile();
+        if (current == null || player.getCurrentAudioCollection() != null) {
+            return;
+        }
+
+        if (!Song.class.isAssignableFrom(current.getClass())) {
+            return;
+        }
+
+        int remained = player.getSource().getRemainedDuration();
+        String genre = ((Song) current).getGenre();
+        int elapsed = current.getDuration() - remained;
+
+        if (elapsed < audioSeed) {
+            return;
+        }
+
+        List<Song> specificSongs = new ArrayList<>();
+        for (Song song: songs) {
+            if (song.getGenre().equalsIgnoreCase(genre)) {
+                specificSongs.add(song);
+            }
+        }
+
+        Random random = new Random(elapsed);
+        int index = random.nextInt(specificSongs.size());
+        songRecommendations.add(specificSongs.get(index));
+
+        boolean changePage = false;
+        if (currentPage == homePage) {
+            previousPage = currentPage;
+            changePage = true;
+        }
+
+        homePage = new HomePage(getLikedSongs(), getFollowedPlaylists(),
+                getSongRecommendations(), getPlaylistRecommendations());
+        if (changePage) {
+            currentPage = homePage;
+        }
+    }
+
+    /**
+     * Adds to the list of recommended playlists
+     */
+    private void recommendPlaylist(final List<Song> songs) {
+        HashMap<String, Integer> gMap = getGenresMap();
+
+        LinkedHashMap<String, Integer> orderedMap = gMap.entrySet()
+                .stream()
+                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (obj1, obj2) -> obj1,
+                        LinkedHashMap::new
+                ));
+
+        if (orderedMap.size() > topRecommended) {
+            List<String> trashKeys = new ArrayList<>(orderedMap.keySet())
+                    .subList(topRecommended, orderedMap.size());
+            for (String key: trashKeys) {
+                orderedMap.remove(key);
+            }
+        }
+
+        List<String> genres = new ArrayList<>();
+        for (Map.Entry<String, Integer> genre: orderedMap.entrySet()) {
+            genres.add(genre.getKey());
+        }
+
+        List<Song> playlistSongs = new ArrayList<>();
+
+        Random rand = new Random();
+
+        int numGenres = orderedMap.size(), cnt = 0;
+        while (cnt < numGenres) {
+            String genre = genres.get(cnt);
+            List<Song> randSongs = new ArrayList<>();
+            List<Song> genreSongs = new ArrayList<>();
+
+            for (Song song: songs) {
+                if (song.getGenre().equals(genre)) {
+                    genreSongs.add(song);
+                }
+            }
+
+            int numSongs = 0;
+            if (cnt == 0) {
+                numSongs = randSongsFirstGenre;
+            } else if (cnt == 1) {
+                numSongs = randSongsSecondGenre;
+            } else if (cnt == 2) {
+                numSongs = randSongsThirdGenre;
+            }
+
+            while (numSongs > 0) {
+                randSongs.add(genreSongs.get(rand.nextInt(genreSongs.size())));
+                numSongs--;
+            }
+
+            playlistSongs.addAll(randSongs);
+            cnt++;
+        }
+
+        int len = playlistSongs.size();
+        for (int i = 0; i < len; i++) {
+            for (int j = i + 1; j < len; j++) {
+                if (playlistSongs.get(i).getLikes() < playlistSongs.get(j).getLikes()) {
+                    Song temp = playlistSongs.get(i);
+                    playlistSongs.set(i, playlistSongs.get(j));
+                    playlistSongs.set(j, temp);
+                }
+            }
+        }
+
+        String pName = "%s's recommendations".formatted(getUsername());
+        Playlist playlist = new Playlist(pName, getUsername());
+        for (Song song: playlistSongs) {
+            playlist.addSong(song);
+        }
+
+        playlistRecommendations.add(playlist);
+    }
+
+    /**
+     * Counts genres from songs, playlists and followedPlaylists
+     *
+     * @return the genres hashmap for playlist recommendations
+     */
+    private HashMap<String, Integer> getGenresMap() {
+        HashMap<String, Integer> gMap = new HashMap<>();
+        for (Song song: likedSongs) {
+            gMap.put(song.getGenre(), gMap.getOrDefault(song.getGenre(), 0) + 1);
+        }
+
+        for (Playlist playlist: playlists) {
+            for (Song song: playlist.getSongs()) {
+                gMap.put(song.getGenre(), gMap.getOrDefault(song.getGenre(), 0) + 1);
+            }
+        }
+
+        for (Playlist playlist: followedPlaylists) {
+            for (Song song: playlist.getSongs()) {
+                gMap.put(song.getGenre(), gMap.getOrDefault(song.getGenre(), 0) + 1);
+            }
+        }
+        return gMap;
     }
 }

@@ -805,4 +805,40 @@ public final class CommandRunner {
 
         return objectNode;
     }
+
+    /**
+     * Updates the recommendations for a user
+     *
+     * @param commandInput the command input
+     * @return the object node
+     */
+    public static ObjectNode updateRecommendations(final CommandInput commandInput) {
+        User user = admin.getUser(commandInput.getUsername());
+        Artist artist = admin.getArtist(commandInput.getUsername());
+        Host host = admin.getHost(commandInput.getUsername());
+
+        String message;
+
+        if (artist != null || host != null) {
+            message = "%s is not a normal user."
+                    .formatted(commandInput.getUsername());
+        } else if (user != null) {
+            message = "The recommendations for user %s have been updated successfully."
+                        .formatted(commandInput.getUsername());
+
+            user.updateRecommendations(commandInput.getRecommendationType(),
+                                        admin.getSongs());
+        } else {
+            message = "The username %s does not exist."
+                        .formatted(commandInput.getUsername());
+        }
+
+        ObjectNode objectNode = objectMapper.createObjectNode();
+        objectNode.put("command", commandInput.getCommand());
+        objectNode.put("user", commandInput.getUsername());
+        objectNode.put("timestamp", commandInput.getTimestamp());
+        objectNode.put("message", message);
+
+        return objectNode;
+    }
 }

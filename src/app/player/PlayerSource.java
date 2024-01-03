@@ -23,6 +23,7 @@ public class PlayerSource {
     @Getter
     private int index;
     private int indexShuffled;
+    @Getter
     private int remainedDuration;
     private final List<Integer> indices = new ArrayList<>();
 
