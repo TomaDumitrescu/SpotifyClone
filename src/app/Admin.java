@@ -7,6 +7,7 @@ import app.audio.Collections.Podcast;
 import app.audio.Files.AudioFile;
 import app.audio.Files.Episode;
 import app.audio.Files.Song;
+import app.pages.Page;
 import app.player.Player;
 import app.user.User;
 import app.user.Artist;
@@ -45,6 +46,7 @@ import java.util.stream.Stream;
  * The type Admin.
  */
 public final class Admin {
+    @Getter
     private List<User> users = new ArrayList<>();
     @Getter
     @Setter
@@ -275,7 +277,8 @@ public final class Admin {
         if (type.equals("user")) {
             users.add((User) UserFactory.createUser(type, username, age, city));
         } else if (type.equals("artist")) {
-            artists.add((Artist) UserFactory.createUser(type, username, age, city));
+            Artist artist = (Artist) UserFactory.createUser(type, username, age, city);
+            artists.add(artist);
         } else {
             hosts.add((Host) UserFactory.createUser(type, username, age, city));
         }
@@ -399,11 +402,12 @@ public final class Admin {
         }
 
         songs.addAll(newSongs);
-        currentArtist.getAlbums().add(new Album(albumName,
-                                                commandInput.getDescription(),
-                                                username,
-                                                newSongs,
-                                                commandInput.getReleaseYear()));
+        Album album = new Album(albumName,
+                commandInput.getDescription(),
+                username,
+                newSongs,
+                commandInput.getReleaseYear());
+        currentArtist.getAlbums().add(album);
         return "%s has added new album successfully.".formatted(username);
     }
 
@@ -732,8 +736,29 @@ public final class Admin {
         }
 
         switch (nextPage) {
-            case "Home" -> user.setCurrentPage(user.getHomePage());
-            case "LikedContent" -> user.setCurrentPage(user.getLikedContentPage());
+            case "Home" -> {
+                user.setCurrentPage(user.getHomePage());
+                ArrayList<Page> pageHistory = user.getPageHistory();
+                pageHistory.add(user.getHomePage());
+
+                // history reset for backward
+                user.setPageIndex(pageHistory.size() - 1);
+                user.setPageHistory(pageHistory);
+            }
+            case "LikedContent" -> {
+                user.setCurrentPage(user.getLikedContentPage());
+                ArrayList<Page> pageHistory = user.getPageHistory();
+                pageHistory.add(user.getLikedContentPage());
+                // history reset for forward
+                user.setPageIndex(pageHistory.size() - 1);
+                user.setPageHistory(pageHistory);
+            }
+            case "Host" -> {
+                return user.setLiveCreatorPage("host");
+            }
+            case "Artist" -> {
+                return user.setLiveCreatorPage("artist");
+            }
             default -> {
                 return "%s is trying to access a non-existent page.".formatted(username);
             }

@@ -1,11 +1,15 @@
 package app.user;
 
+import app.Admin;
 import app.audio.Collections.AudioCollection;
 import app.audio.Collections.Playlist;
 import app.audio.Collections.PlaylistOutput;
+import app.audio.Collections.Album;
+import app.audio.Collections.Podcast;
 import app.audio.Files.AudioFile;
 import app.audio.Files.Song;
 import app.audio.LibraryEntry;
+import app.audio.RecordedEntry;
 import app.pages.HomePage;
 import app.pages.LikedContentPage;
 import app.pages.Page;
@@ -24,6 +28,8 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Comparator;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.stream.Collectors;
 
 /**
@@ -51,18 +57,24 @@ public final class User extends UserAbstract {
     private Page currentPage;
     @Getter
     @Setter
-    private Page previousPage;
+    private ArrayList<Page> pageHistory;
+    @Getter
+    @Setter
+    private int pageIndex;
     @Getter
     @Setter
     private HomePage homePage;
     @Getter
     @Setter
     private LikedContentPage likedContentPage;
+    private Song recommendedSong;
+    private Playlist recommendedPlaylist;
     private final int audioSeed = 30;
     private final int topRecommended = 3;
     private final int randSongsFirstGenre = 5;
     private final int randSongsSecondGenre = 3;
     private final int randSongsThirdGenre = 2;
+    private final int topReference = 5;
 
     /**
      * Instantiates a new User.
@@ -85,7 +97,8 @@ public final class User extends UserAbstract {
 
         homePage = new HomePage(getLikedSongs(), getFollowedPlaylists());
         currentPage = homePage;
-        previousPage = null;
+        pageHistory = new ArrayList<>();
+        pageIndex = -1;
         likedContentPage = new LikedContentPage(getLikedSongs(), getFollowedPlaylists());
     }
 
@@ -151,6 +164,8 @@ public final class User extends UserAbstract {
             }
 
             currentPage = selected.getPage();
+            pageHistory.add(currentPage);
+            pageIndex++;
             return "Successfully selected %s's page.".formatted(selected.getUsername());
         } else {
             LibraryEntry selected = searchBar.select(itemNumber);
@@ -186,6 +201,34 @@ public final class User extends UserAbstract {
         searchBar.clearSelection();
 
         player.pause();
+
+        return "Playback loaded successfully.";
+    }
+
+    /**
+     * Load string.
+     *
+     * @return the string
+     */
+    public String loadRecommendations() {
+        if (!status) {
+            return "%s is offline.".formatted(getUsername());
+        }
+
+        if (recommendedSong == null && recommendedPlaylist == null) {
+            return "No recommendations available.";
+        }
+
+        if (recommendedSong != null) {
+            player.setSource(recommendedSong, "song");
+            player.pause();
+        } else {
+            if (recommendedPlaylist.getSongs().isEmpty()) {
+                return "No recommendations available.";
+            }
+            player.setSource(recommendedPlaylist, "playlist");
+            player.pause();
+        }
 
         return "Playback loaded successfully.";
     }
@@ -618,10 +661,12 @@ public final class User extends UserAbstract {
      * @param songs the admin list of songs
      */
     public void updateRecommendations(final String recommend,
-                                      final List<Song> songs) {
+                                      final List<Song> songs,
+                                      final List<User> users) {
         switch (recommend) {
-            case "random_song" -> recommendSong(songs);
-            case "random_playlist" -> recommendPlaylist(songs);
+            case "random_song" -> recommendSong(new ArrayList<>(songs));
+            case "random_playlist" -> recommendPlaylist(new ArrayList<>(songs));
+            case "fans_playlist" -> recommendFanPlaylist(new ArrayList<>(users));
             default -> { }
         }
     }
@@ -660,17 +705,14 @@ public final class User extends UserAbstract {
         int index = random.nextInt(specificSongs.size());
         songRecommendations.add(specificSongs.get(index));
 
-        boolean changePage = false;
-        if (currentPage == homePage) {
-            previousPage = currentPage;
-            changePage = true;
-        }
+        // update the last recommended audio products
+        recommendedSong = specificSongs.get(index);
+        recommendedPlaylist = null;
 
         homePage = new HomePage(getLikedSongs(), getFollowedPlaylists(),
                 getSongRecommendations(), getPlaylistRecommendations());
-        if (changePage) {
-            currentPage = homePage;
-        }
+
+        currentPage = homePage;
     }
 
     /**
@@ -754,6 +796,16 @@ public final class User extends UserAbstract {
         }
 
         playlistRecommendations.add(playlist);
+
+        homePage = new HomePage(getLikedSongs(), getFollowedPlaylists(),
+                getSongRecommendations(), getPlaylistRecommendations());
+
+        currentPage = homePage;
+
+
+        // update recommended audio products
+        recommendedPlaylist = playlist;
+        recommendedSong = null;
     }
 
     /**
@@ -779,5 +831,188 @@ public final class User extends UserAbstract {
             }
         }
         return gMap;
+    }
+
+    /**
+     * Recommends a playlist based on the user's history of likes
+     *
+     */
+    public void recommendFanPlaylist(final List<User> users) {
+        AudioFile audioFile = player.getCurrentAudioFile();
+        if (audioFile == null || !Song.class.isAssignableFrom(audioFile.getClass())) {
+            return;
+        }
+
+        List<Integer> userListens = getListens(users, (Song) audioFile);
+
+        int len = userListens.size() - 1;
+        for (int i = 0; i < len - 1; i++) {
+            for (int j = 0; j < len; j++) {
+                if (userListens.get(i) < userListens.get(j)) {
+                    int tmpListens = userListens.get(i);
+                    userListens.set(i, userListens.get(j));
+                    userListens.set(j, tmpListens);
+
+                    User tmpUser = users.get(i);
+                    users.set(i, users.get(j));
+                    users.set(j, tmpUser);
+                }
+            }
+        }
+
+        while (users.size() > topReference) {
+            users.remove(users.size() - 1);
+        }
+
+        List<Song> playlistSongs = new ArrayList<>();
+        for (User user: users) {
+            List<Song> likedSongsItr = user.getLikedSongs();
+            likedSongsItr.sort(Comparator.comparingInt(Song::getLikes));
+            int i = 0;
+            while (i < likedSongsItr.size() && i < topReference) {
+                playlistSongs.add(likedSongsItr.get(i));
+                i++;
+            }
+        }
+
+        // eliminating duplicates
+        Set<Song> auxSongs = new HashSet<>(playlistSongs);
+        playlistSongs = new ArrayList<>(auxSongs);
+
+        playlistSongs.sort(Comparator.comparingInt(Song::getLikes));
+        Playlist playlist = new Playlist("%s Fan Club recommendations"
+                .formatted(((Song) audioFile).getArtist()), getUsername());
+
+        for (int i = 0; i < playlistSongs.size(); i++) {
+            Song song = playlistSongs.get(i);
+            playlist.addSong(song);
+        }
+
+        playlistRecommendations.add(playlist);
+
+        homePage = new HomePage(getLikedSongs(), getFollowedPlaylists(),
+                getSongRecommendations(), getPlaylistRecommendations());
+
+        currentPage = homePage;
+
+        recommendedPlaylist = playlist;
+        recommendedSong = null;
+    }
+
+    /**
+     * Calculates the number of listens of the current song artist
+     * for each user
+     *
+     * @param users the admin borrowed list of users
+     * @param current the loaded song
+     * @return the list of users listens for current artist
+     */
+    private List<Integer> getListens(final List<User> users, final Song current) {
+        String artist = current.getArtist();
+
+        int currentListens;
+        List<Integer> userListens = new ArrayList<>();
+        for (User user: users) {
+            currentListens = 0;
+            HashMap<RecordedEntry, Integer> recList = user.player.getRecordedEntries();
+            for (Map.Entry<RecordedEntry, Integer> rec: recList.entrySet()) {
+                RecordedEntry audioProduct = rec.getKey();
+                if (audioProduct.getCreator().equals(artist)
+                    && audioProduct.getType().equals("song")) {
+                    currentListens += rec.getValue();
+                }
+            }
+            userListens.add(currentListens);
+        }
+        return userListens;
+    }
+
+    /**
+     * Changes the page of the user with the previous one
+     *
+     * @return the success message of the command
+     */
+    public String prevPage() {
+        if (pageIndex - 1 < 0 || pageHistory.isEmpty()) {
+            return "There are no pages left to go back.";
+        }
+        pageIndex--;
+        currentPage = pageHistory.get(pageIndex);
+
+        return "The user %s has navigated successfully to the previous page."
+                .formatted(getUsername());
+    }
+
+    /**
+     * Changes the page of the user with the next one
+     *
+     * @return the success message of the command
+     */
+    public String nextPage() {
+        if (pageIndex + 1 >= pageHistory.size()) {
+            return "There are no pages left to go forward.";
+        }
+        pageIndex++;
+        currentPage = pageHistory.get(pageIndex);
+
+        return "The user %s has navigated successfully to the next page."
+                .formatted(getUsername());
+    }
+
+    /**
+     * Gets the creator page of the current track
+     *
+     * @return the command message
+     */
+    public String setLiveCreatorPage(final String pageType) {
+        AudioCollection collection = player.getCurrentAudioCollection();
+        AudioFile file = player.getCurrentAudioFile();
+        if (collection == null && file == null) {
+            return "%s is trying to access a non-existent page.".formatted(getUsername());
+        }
+
+        if (pageType.equals("host") && Album.class.isAssignableFrom(collection.getClass())) {
+            return "%s is trying to access a non-existent page.".formatted(getUsername());
+        }
+
+        if (pageType.equals("artist")) {
+            if (collection != null && Podcast.class.isAssignableFrom(collection.getClass())) {
+                return "%s is trying to access a non-existent page.".formatted(getUsername());
+            }
+
+            if (file != null && !Song.class.isAssignableFrom(file.getClass())) {
+                return "%s is trying to access a non-existent page.".formatted(getUsername());
+            }
+        }
+
+        if (pageType.equals("artist")) {
+            String artistName;
+            if (collection != null) {
+                artistName = collection.getOwner();
+                Artist artist = Admin.getInstance().getArtist(artistName);
+                setCurrentPage(artist.getPage());
+            } else {
+                artistName = ((Song) file).getArtist();
+                Artist artist = Admin.getInstance().getArtist(artistName);
+                setCurrentPage(artist.getPage());
+            }
+
+            pageHistory.add(currentPage);
+            pageIndex++;
+
+            return "%s accessed Artist successfully.".formatted(getUsername());
+        } else {
+            if (collection != null) {
+                String hostName = collection.getOwner();
+                Host host = Admin.getInstance().getHost(hostName);
+                setCurrentPage(host.getPage());
+                pageHistory.add(currentPage);
+                pageIndex++;
+
+                return "%s accessed Host successfully.".formatted(getUsername());
+            }
+
+            return "%s is trying to access a non-existent page.".formatted(getUsername());
+        }
     }
 }

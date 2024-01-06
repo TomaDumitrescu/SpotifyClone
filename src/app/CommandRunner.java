@@ -827,11 +827,94 @@ public final class CommandRunner {
                         .formatted(commandInput.getUsername());
 
             user.updateRecommendations(commandInput.getRecommendationType(),
-                                        admin.getSongs());
+                                        admin.getSongs(), admin.getUsers());
         } else {
             message = "The username %s does not exist."
                         .formatted(commandInput.getUsername());
         }
+
+        ObjectNode objectNode = objectMapper.createObjectNode();
+        objectNode.put("command", commandInput.getCommand());
+        objectNode.put("user", commandInput.getUsername());
+        objectNode.put("timestamp", commandInput.getTimestamp());
+        objectNode.put("message", message);
+
+        return objectNode;
+    }
+
+    /**
+     * Moves to the previous page if there is one
+     *
+     * @param commandInput the command input
+     * @return the object node
+     */
+    public static ObjectNode previousPage(final CommandInput commandInput) {
+        User user = admin.getUser(commandInput.getUsername());
+        Artist artist = admin.getArtist(commandInput.getUsername());
+        Host host = admin.getHost(commandInput.getUsername());
+
+        String message;
+
+        if (artist != null || host != null) {
+            message = "%s is not a normal user."
+                    .formatted(commandInput.getUsername());
+        } else if (user != null) {
+            message = user.prevPage();
+        } else {
+            message = "The username %s does not exist."
+                    .formatted(commandInput.getUsername());
+        }
+
+        ObjectNode objectNode = objectMapper.createObjectNode();
+        objectNode.put("command", commandInput.getCommand());
+        objectNode.put("user", commandInput.getUsername());
+        objectNode.put("timestamp", commandInput.getTimestamp());
+        objectNode.put("message", message);
+
+        return objectNode;
+    }
+
+    /**
+     * Moves to the next page if there is one
+     *
+     * @param commandInput the command input
+     * @return the object node
+     */
+    public static ObjectNode nextPage(final CommandInput commandInput) {
+        User user = admin.getUser(commandInput.getUsername());
+        Artist artist = admin.getArtist(commandInput.getUsername());
+        Host host = admin.getHost(commandInput.getUsername());
+
+        String message;
+
+        if (artist != null || host != null) {
+            message = "%s is not a normal user."
+                    .formatted(commandInput.getUsername());
+        } else if (user != null) {
+            message = user.nextPage();
+        } else {
+            message = "The username %s does not exist."
+                    .formatted(commandInput.getUsername());
+        }
+
+        ObjectNode objectNode = objectMapper.createObjectNode();
+        objectNode.put("command", commandInput.getCommand());
+        objectNode.put("user", commandInput.getUsername());
+        objectNode.put("timestamp", commandInput.getTimestamp());
+        objectNode.put("message", message);
+
+        return objectNode;
+    }
+
+    /**
+     * Load recommendations object node.
+     *
+     * @param commandInput the command input
+     * @return the object node
+     */
+    public static ObjectNode loadRecommendations(final CommandInput commandInput) {
+        User user = admin.getUser(commandInput.getUsername());
+        String message = user.loadRecommendations();
 
         ObjectNode objectNode = objectMapper.createObjectNode();
         objectNode.put("command", commandInput.getCommand());

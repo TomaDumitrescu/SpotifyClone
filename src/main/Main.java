@@ -147,9 +147,10 @@ public final class Main {
                 case "seeMerch" -> outputs.add("");
                 case "updateRecommendations" -> outputs.add(CommandRunner
                                                 .updateRecommendations(command));
-                case "previousPage" -> outputs.add("");
-                case "loadRecommendations" -> outputs.add("");
-                case "nextPage" -> outputs.add("");
+                case "previousPage" -> outputs.add(CommandRunner.previousPage(command));
+                case "loadRecommendations" -> outputs.add(CommandRunner
+                                                .loadRecommendations(command));
+                case "nextPage" -> outputs.add(CommandRunner.nextPage(command));
                 default -> System.out.println("Invalid command " + commandName);
             }
         }

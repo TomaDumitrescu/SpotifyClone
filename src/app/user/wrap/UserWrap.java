@@ -48,7 +48,8 @@ public final class UserWrap implements Wrap {
     public void sortData(final LinkedHashMap<String, Integer> artists,
                          final LinkedHashMap<String, Integer> genres,
                          final LinkedHashMap<RecordedEntry, Integer> songs,
-                         final LinkedHashMap<RecordedEntry, Integer> albums,
+                         final LinkedHashMap<RecordedEntry, Integer> auxAlbums,
+                         final LinkedHashMap<String, Integer> albums,
                          final LinkedHashMap<RecordedEntry, Integer> episodes) {
 
         int listens;
@@ -58,7 +59,7 @@ public final class UserWrap implements Wrap {
             genres.put(rec.getGenre(), genres.getOrDefault(rec.getGenre(), 0) + listens);
         }
 
-        for (Map.Entry<RecordedEntry, Integer> album: albums.entrySet()) {
+        for (Map.Entry<RecordedEntry, Integer> album: auxAlbums.entrySet()) {
             RecordedEntry rec = album.getKey();
             listens = album.getValue();
             artists.put(rec.getCreator(), artists.getOrDefault(rec.getCreator(), 0) + listens);
@@ -67,7 +68,7 @@ public final class UserWrap implements Wrap {
         sortStringIntMaps(artists, topReference);
         sortStringIntMaps(genres, topReference);
         sortRecorded(songs, topReference);
-        sortRecorded(albums, topReference);
+        sortStringIntMaps(albums, topReference);
         sortRecorded(episodes, topReference);
     }
 
@@ -83,6 +84,7 @@ public final class UserWrap implements Wrap {
 
         LinkedHashMap<String, Integer> artists = new LinkedHashMap<>();
         LinkedHashMap<String, Integer> genres = new LinkedHashMap<>();
+        LinkedHashMap<String, Integer> albums = new LinkedHashMap<>();
 
         LinkedHashMap<RecordedEntry, Integer> songs = recordedEntries.entrySet()
                 .stream()
@@ -94,7 +96,7 @@ public final class UserWrap implements Wrap {
                         LinkedHashMap::new
                 ));
 
-        LinkedHashMap<RecordedEntry, Integer> albums = recordedEntries.entrySet()
+        LinkedHashMap<RecordedEntry, Integer> auxAlbums = recordedEntries.entrySet()
                 .stream()
                 .filter(obj -> "album".equals(obj.getKey().getType()))
                 .collect(Collectors.toMap(
@@ -114,7 +116,13 @@ public final class UserWrap implements Wrap {
                         LinkedHashMap::new
                 ));
 
-        sortData(artists, genres, songs, albums, episodes);
+        for (Map.Entry<RecordedEntry, Integer> album: auxAlbums.entrySet()) {
+            RecordedEntry rec = album.getKey();
+            int val = album.getValue();
+            albums.put(rec.getName(), albums.getOrDefault(rec.getName(), 0) + val);
+        }
+
+        sortData(artists, genres, songs, auxAlbums, albums, episodes);
 
         if (emptyData(artists, genres, songs, albums, episodes)) {
             return null;
@@ -134,9 +142,7 @@ public final class UserWrap implements Wrap {
         result.set("topSongs", objectMapper.valueToTree(printData));
         printData.clear();
 
-        for (Map.Entry<RecordedEntry, Integer> album: albums.entrySet()) {
-            printData.put(album.getKey().getName(), album.getValue());
-        }
+        printData.putAll(albums);
         result.set("topAlbums", objectMapper.valueToTree(printData));
         printData.clear();
 
@@ -162,7 +168,7 @@ public final class UserWrap implements Wrap {
     boolean emptyData(final LinkedHashMap<String, Integer> artists,
                       final LinkedHashMap<String, Integer> genres,
                       final LinkedHashMap<RecordedEntry, Integer> songs,
-                      final LinkedHashMap<RecordedEntry, Integer> albums,
+                      final LinkedHashMap<String, Integer> albums,
                       final LinkedHashMap<RecordedEntry, Integer> episodes) {
         return artists.isEmpty() && genres.isEmpty() && songs.isEmpty()
                 && albums.isEmpty() && episodes.isEmpty();
