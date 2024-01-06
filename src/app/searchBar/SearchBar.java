@@ -62,56 +62,54 @@ public final class SearchBar {
     public List<LibraryEntry> search(final Filters filters, final String type) {
         List<LibraryEntry> entries;
 
-        FilterUtils utils = FilterUtils.getInstance();
-
         switch (type) {
             case "song":
                 entries = new ArrayList<>(admin.getSongs());
 
                 if (filters.getName() != null) {
-                    entries = utils.filterByName(entries, filters.getName());
+                    entries = FilterUtils.filterByName(entries, filters.getName());
                 }
 
                 if (filters.getAlbum() != null) {
-                    entries = utils.filterByAlbum(entries, filters.getAlbum());
+                    entries = FilterUtils.filterByAlbum(entries, filters.getAlbum());
                 }
 
                 if (filters.getTags() != null) {
-                    entries = utils.filterByTags(entries, filters.getTags());
+                    entries = FilterUtils.filterByTags(entries, filters.getTags());
                 }
 
                 if (filters.getLyrics() != null) {
-                    entries = utils.filterByLyrics(entries, filters.getLyrics());
+                    entries = FilterUtils.filterByLyrics(entries, filters.getLyrics());
                 }
 
                 if (filters.getGenre() != null) {
-                    entries = utils.filterByGenre(entries, filters.getGenre());
+                    entries = FilterUtils.filterByGenre(entries, filters.getGenre());
                 }
 
                 if (filters.getReleaseYear() != null) {
-                    entries = utils.filterByReleaseYear(entries, filters.getReleaseYear());
+                    entries = FilterUtils.filterByReleaseYear(entries, filters.getReleaseYear());
                 }
 
                 if (filters.getArtist() != null) {
-                    entries = utils.filterByArtist(entries, filters.getArtist());
+                    entries = FilterUtils.filterByArtist(entries, filters.getArtist());
                 }
 
                 break;
             case "playlist":
                 entries = new ArrayList<>(admin.getPlaylists());
 
-                entries = utils.filterByPlaylistVisibility(entries, user);
+                entries = FilterUtils.filterByPlaylistVisibility(entries, user);
 
                 if (filters.getName() != null) {
-                    entries = utils.filterByName(entries, filters.getName());
+                    entries = FilterUtils.filterByName(entries, filters.getName());
                 }
 
                 if (filters.getOwner() != null) {
-                    entries = utils.filterByOwner(entries, filters.getOwner());
+                    entries = FilterUtils.filterByOwner(entries, filters.getOwner());
                 }
 
                 if (filters.getFollowers() != null) {
-                    entries = utils.filterByFollowers(entries, filters.getFollowers());
+                    entries = FilterUtils.filterByFollowers(entries, filters.getFollowers());
                 }
 
                 break;
@@ -119,11 +117,11 @@ public final class SearchBar {
                 entries = new ArrayList<>(admin.getPodcasts());
 
                 if (filters.getName() != null) {
-                    entries = utils.filterByName(entries, filters.getName());
+                    entries = FilterUtils.filterByName(entries, filters.getName());
                 }
 
                 if (filters.getOwner() != null) {
-                    entries = utils.filterByOwner(entries, filters.getOwner());
+                    entries = FilterUtils.filterByOwner(entries, filters.getOwner());
                 }
 
                 break;
@@ -131,15 +129,15 @@ public final class SearchBar {
                 entries = new ArrayList<>(admin.getAlbums());
 
                 if (filters.getName() != null) {
-                    entries = utils.filterByName(entries, filters.getName());
+                    entries = FilterUtils.filterByName(entries, filters.getName());
                 }
 
                 if (filters.getOwner() != null) {
-                    entries = utils.filterByOwner(entries, filters.getOwner());
+                    entries = FilterUtils.filterByOwner(entries, filters.getOwner());
                 }
 
                 if (filters.getDescription() != null) {
-                    entries = utils.filterByDescription(entries, filters.getDescription());
+                    entries = FilterUtils.filterByDescription(entries, filters.getDescription());
                 }
 
                 break;
