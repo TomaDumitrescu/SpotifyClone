@@ -1,9 +1,7 @@
 package app.player;
 
 import app.Admin;
-import app.audio.Collections.Album;
 import app.audio.Collections.AudioCollection;
-import app.audio.Collections.Playlist;
 import app.audio.Collections.Podcast;
 import app.audio.Files.AudioFile;
 import app.audio.Files.Episode;
@@ -33,6 +31,8 @@ public final class Player {
     private ArrayList<PodcastBookmark> bookmarks = new ArrayList<>();
     @Getter
     private HashMap<RecordedEntry, Integer> recordedEntries = new HashMap<>();
+    @Getter
+    private HashMap<String, Integer> listenedGenres = new HashMap<>();
 
 
     /**
@@ -331,12 +331,12 @@ public final class Player {
             }
 
             String productType;
-            if (Album.class.isAssignableFrom(current.getClass())) {
+            if (type.equals("album")) {
                 productType = "album";
-            } else if (Podcast.class.isAssignableFrom(current.getClass())) {
+            } else if (type.equals("podcast")) {
                 productType = "podcast";
             } else {
-                if (!Playlist.class.isAssignableFrom(current.getClass())) {
+                if (!type.equals("playlist")) {
                     throw new RuntimeException("Error. No valid audio collection type!");
                 }
 
@@ -354,10 +354,12 @@ public final class Player {
             return;
         }
 
-        if (Song.class.isAssignableFrom(current.getClass())) {
+        if (type.equals("song") || type.equals("album")) {
             Song song = (Song) current;
             rec = new RecordedEntry(song.getName(), song.getArtist(), "song");
             rec.setGenre(song.getGenre());
+            listenedGenres.put(song.getGenre(),
+                    listenedGenres.getOrDefault(song.getGenre(), 0) + 1);
             List<Artist> artists = Admin.getInstance().getArtists();
             for (Artist artist: artists) {
                 if (artist.getUsername().equalsIgnoreCase(song.getArtist())) {
@@ -373,7 +375,7 @@ public final class Player {
                 recordedEntries.put(rec, recordedEntries.getOrDefault(rec, 0) + 1);
             }
         } else  {
-            if (!Episode.class.isAssignableFrom(current.getClass())) {
+            if (!type.equals("episode") && !type.equals("podcast")) {
                 throw new RuntimeException("Error. No valid audio file type!");
             }
 

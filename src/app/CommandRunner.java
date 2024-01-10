@@ -8,6 +8,7 @@ import app.searchBar.Filters;
 import app.user.Artist;
 import app.user.Host;
 import app.user.User;
+import app.user.notifications.Notification;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import fileio.input.CommandInput;
@@ -921,6 +922,50 @@ public final class CommandRunner {
         objectNode.put("user", commandInput.getUsername());
         objectNode.put("timestamp", commandInput.getTimestamp());
         objectNode.put("message", message);
+
+        return objectNode;
+    }
+    /**
+     * Subscribe/Unsubscribe command.
+     *
+     * @param commandInput the command input
+     * @return the object node
+     */
+    public static ObjectNode subscribe(final CommandInput commandInput) {
+        User user = admin.getUser(commandInput.getUsername());
+        String message;
+
+        if (user == null) {
+            message = "The username %s doesn't exist.".formatted(commandInput.getUsername());
+        } else {
+            message = admin.subscribe(user);
+        }
+
+        ObjectNode objectNode = objectMapper.createObjectNode();
+        objectNode.put("command", commandInput.getCommand());
+        objectNode.put("user", commandInput.getUsername());
+        objectNode.put("timestamp", commandInput.getTimestamp());
+        objectNode.put("message", message);
+
+        return objectNode;
+    }
+
+    /**
+     * Prints the received notifications for an user.
+     *
+     * @param commandInput the command input
+     * @return the object node
+     */
+    public static ObjectNode getNotifications(final CommandInput commandInput) {
+        User user = admin.getUser(commandInput.getUsername());
+
+        List<Notification> notifications = user.getNotifications();
+
+        ObjectNode objectNode = objectMapper.createObjectNode();
+        objectNode.put("command", commandInput.getCommand());
+        objectNode.put("user", commandInput.getUsername());
+        objectNode.put("timestamp", commandInput.getTimestamp());
+        objectNode.put("notifications", objectMapper.valueToTree(notifications));
 
         return objectNode;
     }

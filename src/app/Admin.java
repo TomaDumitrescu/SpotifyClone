@@ -17,6 +17,8 @@ import app.user.UserAbstract;
 import app.user.Event;
 import app.user.Announcement;
 import app.user.Merchandise;
+import app.user.notifications.Notification;
+import app.user.notifications.NotificationManager;
 import app.user.wrap.ArtistWrap;
 import app.user.wrap.HostWrap;
 import app.user.wrap.UserWrap;
@@ -67,6 +69,7 @@ public final class Admin {
     private final int dateDayHigherLimit = 31;
     private final int dateFebHigherLimit = 28;
     private final double roundTool = 100.0;
+    private NotificationManager notificationManager = new NotificationManager();
     private static Admin instance;
 
     private Admin() {
@@ -275,7 +278,9 @@ public final class Admin {
         }
 
         if (type.equals("user")) {
-            users.add((User) UserFactory.createUser(type, username, age, city));
+            User user = (User) UserFactory.createUser(type, username, age, city);
+            users.add(user);
+            notificationManager.addObserver(user);
         } else if (type.equals("artist")) {
             Artist artist = (Artist) UserFactory.createUser(type, username, age, city);
             artists.add(artist);
@@ -327,6 +332,7 @@ public final class Admin {
                                             .removeAll(user.getPlaylists()));
 
         users.remove(user);
+        notificationManager.rmObserver(user);
         return "%s was successfully deleted.".formatted(user.getUsername());
     }
 
@@ -408,6 +414,11 @@ public final class Admin {
                 newSongs,
                 commandInput.getReleaseYear());
         currentArtist.getAlbums().add(album);
+
+        Notification notification = new Notification("New Album",
+                "New Album from " + username + ".");
+        notificationManager.notifyObservers(notification, username);
+
         return "%s has added new album successfully.".formatted(username);
     }
 
@@ -498,6 +509,10 @@ public final class Admin {
         currentHost.getPodcasts().add(newPodcast);
         podcasts.add(newPodcast);
 
+        Notification notification = new Notification("New Podcast",
+                "New Podcast from " + username + ".");
+        notificationManager.notifyObservers(notification, username);
+
         return "%s has added new podcast successfully.".formatted(username);
     }
 
@@ -567,6 +582,11 @@ public final class Admin {
         currentArtist.getEvents().add(new Event(eventName,
                                                 commandInput.getDescription(),
                                                 commandInput.getDate()));
+
+        Notification notification = new Notification("New Event",
+                "New Event from " + username + ".");
+        notificationManager.notifyObservers(notification, username);
+
         return "%s has added new event successfully.".formatted(username);
     }
 
@@ -651,6 +671,11 @@ public final class Admin {
         currentArtist.getMerch().add(new Merchandise(commandInput.getName(),
                                                      commandInput.getDescription(),
                                                      commandInput.getPrice()));
+
+        Notification notification = new Notification("New Merchandise",
+                "New Merchandise from " + username + ".");
+        notificationManager.notifyObservers(notification, username);
+
         return "%s has added new merchandise successfully.".formatted(username);
     }
 
@@ -681,6 +706,11 @@ public final class Admin {
 
         currentHost.getAnnouncements().add(new Announcement(announcementName,
                                                             announcementDescription));
+
+        Notification notification = new Notification("New Announcement",
+                "New Announcement from " + username + ".");
+        notificationManager.notifyObservers(notification, username);
+
         return "%s has successfully added new announcement.".formatted(username);
     }
 
@@ -929,6 +959,7 @@ public final class Admin {
 
         if (user != null && user.getPlayer() != null) {
             userWrap.setRecordedEntries(user.getPlayer().getRecordedEntries());
+            userWrap.setListenedGenres(user.getPlayer().getListenedGenres());
             objectNode = userWrap.generateStatistics();
         } else if (artist != null) {
             artistWrap.setUsers(users);
@@ -1001,5 +1032,63 @@ public final class Admin {
         objectNode.put("result", resultNode);
 
         return objectNode;
+    }
+
+    /**
+     * Adds the users from the library to the observers list
+     */
+    public void initializeObservers() {
+        for (User user: users) {
+            notificationManager.addObserver(user);
+        }
+    }
+
+    /**
+     * Register the user subscription in subscriptions to get notifications
+     * The target content creator should be found on user current page
+     *
+     * @param user the user that subscribes
+     * @return the command message
+     */
+    public String subscribe(final User user) {
+        Artist accessedArtist = null;
+        for (Artist artist: artists) {
+            if (user.getCurrentPage() == artist.getPage()) {
+                accessedArtist = artist;
+            }
+        }
+
+        Host accessedHost = null;
+        for (Host host: hosts) {
+            if (user.getCurrentPage() == host.getPage()) {
+                accessedHost = host;
+            }
+        }
+
+        if (accessedArtist == null && accessedHost == null) {
+            return "To subscribe you need to be on the page of an artist or host.";
+        }
+
+        String subscription;
+        if (accessedArtist == null) {
+            subscription = accessedHost.getUsername();
+
+            if (user.addSubscription(subscription)) {
+                return "%s subscribed to %s successfully."
+                        .formatted(user.getUsername(), subscription);
+            }
+
+            return "%s unsubscribed from %s successfully."
+                    .formatted(user.getUsername(), subscription);
+        }
+
+        subscription = accessedArtist.getUsername();
+        if (user.addSubscription(subscription)) {
+            return "%s subscribed to %s successfully."
+                    .formatted(user.getUsername(), subscription);
+        }
+
+        return "%s unsubscribed from %s successfully."
+                .formatted(user.getUsername(), subscription);
     }
 }

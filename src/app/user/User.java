@@ -4,8 +4,6 @@ import app.Admin;
 import app.audio.Collections.AudioCollection;
 import app.audio.Collections.Playlist;
 import app.audio.Collections.PlaylistOutput;
-import app.audio.Collections.Album;
-import app.audio.Collections.Podcast;
 import app.audio.Files.AudioFile;
 import app.audio.Files.Song;
 import app.audio.LibraryEntry;
@@ -17,6 +15,8 @@ import app.player.Player;
 import app.player.PlayerStats;
 import app.searchBar.Filters;
 import app.searchBar.SearchBar;
+import app.user.notifications.Notification;
+import app.user.notifications.Observer;
 import app.utils.Enums;
 import lombok.Getter;
 import lombok.Setter;
@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 /**
  * The type User.
  */
-public final class User extends UserAbstract {
+public final class User extends UserAbstract implements Observer {
     @Getter
     private ArrayList<Playlist> playlists;
     @Getter
@@ -69,6 +69,9 @@ public final class User extends UserAbstract {
     private LikedContentPage likedContentPage;
     private Song recommendedSong;
     private Playlist recommendedPlaylist;
+    private ArrayList<Notification> notifications;
+    @Getter
+    private ArrayList<String> subscriptions;
     private final int audioSeed = 30;
     private final int topRecommended = 3;
     private final int randSongsFirstGenre = 5;
@@ -90,6 +93,8 @@ public final class User extends UserAbstract {
         songRecommendations = new ArrayList<>();
         playlistRecommendations = new ArrayList<>();
         followedPlaylists = new ArrayList<>();
+        notifications = new ArrayList<>();
+        subscriptions = new ArrayList<>();
         player = new Player();
         searchBar = new SearchBar(username);
         lastSearched = false;
@@ -678,11 +683,12 @@ public final class User extends UserAbstract {
      */
     private void recommendSong(final List<Song> songs) {
         AudioFile current = player.getCurrentAudioFile();
+        String type = player.getType();
         if (current == null || player.getCurrentAudioCollection() != null) {
             return;
         }
 
-        if (!Song.class.isAssignableFrom(current.getClass())) {
+        if (!type.equals("album") && !type.equals("song")) {
             return;
         }
 
@@ -839,7 +845,8 @@ public final class User extends UserAbstract {
      */
     public void recommendFanPlaylist(final List<User> users) {
         AudioFile audioFile = player.getCurrentAudioFile();
-        if (audioFile == null || !Song.class.isAssignableFrom(audioFile.getClass())) {
+        String type = player.getType();
+        if (audioFile == null || !type.equals("song")) {
             return;
         }
 
@@ -967,22 +974,17 @@ public final class User extends UserAbstract {
     public String setLiveCreatorPage(final String pageType) {
         AudioCollection collection = player.getCurrentAudioCollection();
         AudioFile file = player.getCurrentAudioFile();
+        String type = player.getType();
         if (collection == null && file == null) {
             return "%s is trying to access a non-existent page.".formatted(getUsername());
         }
 
-        if (pageType.equals("host") && Album.class.isAssignableFrom(collection.getClass())) {
+        if (pageType.equals("host") && type.equals("album")) {
             return "%s is trying to access a non-existent page.".formatted(getUsername());
         }
 
-        if (pageType.equals("artist")) {
-            if (collection != null && Podcast.class.isAssignableFrom(collection.getClass())) {
-                return "%s is trying to access a non-existent page.".formatted(getUsername());
-            }
-
-            if (file != null && !Song.class.isAssignableFrom(file.getClass())) {
-                return "%s is trying to access a non-existent page.".formatted(getUsername());
-            }
+        if (pageType.equals("artist") && collection != null && type.equals("podcast")) {
+            return "%s is trying to access a non-existent page.".formatted(getUsername());
         }
 
         if (pageType.equals("artist")) {
@@ -1014,5 +1016,40 @@ public final class User extends UserAbstract {
 
             return "%s is trying to access a non-existent page.".formatted(getUsername());
         }
+    }
+
+    @Override
+    public void update(final Notification notification) {
+        notifications.add(notification);
+    }
+
+    /**
+     * In the case the subscription command is valid, it adds the subscription
+     * when the targeted content creator is not already present in the list
+     * Otherwise, it removes it (unsubscribe).
+     *
+     * @param subscription the name of the content creator
+     * @return true for subscribe, false for unsubscribe
+     */
+    public boolean addSubscription(final String subscription) {
+        if (subscriptions.contains(subscription)) {
+            subscriptions.remove(subscription);
+            return false;
+        }
+
+        subscriptions.add(subscription);
+        return true;
+    }
+
+    /**
+     * Returns the received notifications and then deletes them from
+     * the recorded notifications (notifications are seen only once).
+     *
+     * @return the arraylist of notifications
+     */
+    public ArrayList<Notification> getNotifications() {
+        ArrayList<Notification> outputNotifications = new ArrayList<>(notifications);
+        notifications.clear();
+        return outputNotifications;
     }
 }

@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 public final class UserWrap implements Wrap {
     private static UserWrap instance = null;
     private HashMap<RecordedEntry, Integer> recordedEntries;
+    private HashMap<String, Integer> listenedGenres;
     private String username;
     private final int topReference = 5;
 
@@ -53,11 +54,7 @@ public final class UserWrap implements Wrap {
                          final LinkedHashMap<RecordedEntry, Integer> episodes) {
 
         int listens;
-        for (Map.Entry<RecordedEntry, Integer> song: songs.entrySet()) {
-            RecordedEntry rec = song.getKey();
-            listens = song.getValue();
-            genres.put(rec.getGenre(), genres.getOrDefault(rec.getGenre(), 0) + listens);
-        }
+        genres.putAll(listenedGenres);
 
         for (Map.Entry<RecordedEntry, Integer> album: auxAlbums.entrySet()) {
             RecordedEntry rec = album.getKey();
