@@ -7,12 +7,14 @@ import app.player.PlayerStats;
 import app.searchBar.Filters;
 import app.user.Artist;
 import app.user.Host;
+import app.user.Merchandise;
 import app.user.User;
-import app.user.notifications.Notification;
+import app.notifications.Notification;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import fileio.input.CommandInput;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -966,6 +968,57 @@ public final class CommandRunner {
         objectNode.put("user", commandInput.getUsername());
         objectNode.put("timestamp", commandInput.getTimestamp());
         objectNode.put("notifications", objectMapper.valueToTree(notifications));
+
+        return objectNode;
+    }
+
+    /**
+     * Handles payment from user to artist for merchandise object.
+     *
+     * @param commandInput the command input
+     * @return the object node
+     */
+    public static ObjectNode buyMerch(final CommandInput commandInput) {
+        User user = admin.getUser(commandInput.getUsername());
+        String message;
+
+        if (user == null) {
+            message = "The username %s doesn't exist.".formatted(commandInput.getUsername());
+        } else {
+            message = admin.buyMerch(user, commandInput.getName());
+        }
+
+        ObjectNode objectNode = objectMapper.createObjectNode();
+        objectNode.put("command", commandInput.getCommand());
+        objectNode.put("user", commandInput.getUsername());
+        objectNode.put("timestamp", commandInput.getTimestamp());
+        objectNode.put("message", message);
+
+        return objectNode;
+    }
+
+    /**
+     * Prints the merchandise product bought by an user
+     *
+     * @param commandInput the command input
+     * @return the object node
+     */
+    public static ObjectNode seeMerch(final CommandInput commandInput) {
+        ObjectNode objectNode = objectMapper.createObjectNode();
+        objectNode.put("command", commandInput.getCommand());
+        objectNode.put("user", commandInput.getUsername());
+        objectNode.put("timestamp", commandInput.getTimestamp());
+
+        User user = admin.getUser(commandInput.getUsername());
+        String message;
+
+        if (user == null) {
+            message = "The username %s doesn't exist.".formatted(commandInput.getUsername());
+            objectNode.put("message", message);
+        } else {
+            ArrayList<String> purchasedMerch = user.getPurchasedMerch();
+            objectNode.put("result", objectMapper.valueToTree(purchasedMerch));
+        }
 
         return objectNode;
     }

@@ -144,8 +144,8 @@ public final class Main {
                 case "adBreak" -> outputs.add("");
                 case "subscribe" -> outputs.add(CommandRunner.subscribe(command));
                 case "getNotifications" -> outputs.add(CommandRunner.getNotifications(command));
-                case "buyMerch" -> outputs.add("");
-                case "seeMerch" -> outputs.add("");
+                case "buyMerch" -> outputs.add(CommandRunner.buyMerch(command));
+                case "seeMerch" -> outputs.add(CommandRunner.seeMerch(command));
                 case "updateRecommendations" -> outputs.add(CommandRunner
                                                 .updateRecommendations(command));
                 case "previousPage" -> outputs.add(CommandRunner.previousPage(command));

@@ -8,6 +8,7 @@ import app.audio.Files.AudioFile;
 import app.audio.Files.Song;
 import app.audio.LibraryEntry;
 import app.audio.RecordedEntry;
+import app.monetization.PayStrategy;
 import app.pages.HomePage;
 import app.pages.LikedContentPage;
 import app.pages.Page;
@@ -15,9 +16,10 @@ import app.player.Player;
 import app.player.PlayerStats;
 import app.searchBar.Filters;
 import app.searchBar.SearchBar;
-import app.user.notifications.Notification;
-import app.user.notifications.Observer;
+import app.notifications.Notification;
+import app.notifications.Observer;
 import app.utils.Enums;
+import com.fasterxml.jackson.core.util.RequestPayload;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -35,7 +37,7 @@ import java.util.stream.Collectors;
 /**
  * The type User.
  */
-public final class User extends UserAbstract implements Observer {
+public final class User extends UserAbstract implements Observer, PayStrategy {
     @Getter
     private ArrayList<Playlist> playlists;
     @Getter
@@ -69,6 +71,9 @@ public final class User extends UserAbstract implements Observer {
     private LikedContentPage likedContentPage;
     private Song recommendedSong;
     private Playlist recommendedPlaylist;
+    @Getter
+    @Setter
+    private ArrayList<String> purchasedMerch;
     private ArrayList<Notification> notifications;
     @Getter
     private ArrayList<String> subscriptions;
@@ -95,6 +100,7 @@ public final class User extends UserAbstract implements Observer {
         followedPlaylists = new ArrayList<>();
         notifications = new ArrayList<>();
         subscriptions = new ArrayList<>();
+        purchasedMerch = new ArrayList<>();
         player = new Player();
         searchBar = new SearchBar(username);
         lastSearched = false;
@@ -1051,5 +1057,14 @@ public final class User extends UserAbstract implements Observer {
         ArrayList<Notification> outputNotifications = new ArrayList<>(notifications);
         notifications.clear();
         return outputNotifications;
+    }
+
+    @Override
+    public void pay(Double price, Artist seller, String productType) {
+        if (productType.equals("song")) {
+            seller.setSongRevenue(seller.getSongRevenue() + price);
+        } else if (productType.equals("merchandise")) {
+            seller.setMerchRevenue(seller.getMerchRevenue() + price);
+        }
     }
 }

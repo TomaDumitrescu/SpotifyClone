@@ -6,7 +6,6 @@ import java.util.List;
 import app.audio.Collections.Album;
 import app.audio.Collections.AlbumOutput;
 import app.audio.Files.Song;
-//import app.pages.ArtistPage;
 
 import app.pages.ArtistPage;
 import lombok.Getter;
@@ -113,5 +112,9 @@ public final class Artist extends ContentCreator {
      */
     public String userType() {
         return "artist";
+    }
+
+    public double totalRevenue() {
+        return songRevenue + merchRevenue;
     }
 }

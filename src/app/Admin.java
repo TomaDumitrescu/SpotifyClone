@@ -17,8 +17,8 @@ import app.user.UserAbstract;
 import app.user.Event;
 import app.user.Announcement;
 import app.user.Merchandise;
-import app.user.notifications.Notification;
-import app.user.notifications.NotificationManager;
+import app.notifications.Notification;
+import app.notifications.NotificationManager;
 import app.user.wrap.ArtistWrap;
 import app.user.wrap.HostWrap;
 import app.user.wrap.UserWrap;
@@ -680,6 +680,44 @@ public final class Admin {
     }
 
     /**
+     *
+     * @return the command message
+     */
+    public String buyMerch(User user, String merchandiseName) {
+        Artist accessedArtist = null;
+        for (Artist artist: artists) {
+            if (user.getCurrentPage() == artist.getPage()) {
+                accessedArtist = artist;
+                break;
+            }
+        }
+
+        if (accessedArtist == null) {
+            return "Cannot buy merch from this page.";
+        }
+
+        Merchandise targetedMerch = null;
+
+        for (Merchandise merch: accessedArtist.getMerch()) {
+            if (merch.getName().equals(merchandiseName)) {
+                targetedMerch = merch;
+                break;
+            }
+        }
+
+        if (targetedMerch == null) {
+            return "The merch %s doesn't exist.".formatted(merchandiseName);
+        }
+
+        ArrayList<String> purchasedMerch = user.getPurchasedMerch();
+        purchasedMerch.add(merchandiseName);
+        user.setPurchasedMerch(purchasedMerch);
+        user.pay((double) targetedMerch.getPrice(), accessedArtist, "merchandise");
+
+        return "%s has added new merch successfully.".formatted(user.getUsername());
+    }
+
+    /**
      * Add announcement string.
      *
      * @param commandInput the command input
@@ -989,7 +1027,7 @@ public final class Admin {
      */
     public void setActiveArtists(final ArrayList<Artist> activeArtists) {
         for (Artist artist: artists) {
-            if (artist.getListens() > 0) {
+            if (artist.getListens() > 0 || artist.getMerchRevenue() > 0) {
                 activeArtists.add(artist);
             }
         }
@@ -999,6 +1037,21 @@ public final class Admin {
         int rank = 1;
         for (Artist artist: activeArtists) {
             artist.setRanking(rank++);
+        }
+
+        int len = activeArtists.size();
+        for (int i = 0; i < len - 1; i++) {
+            for (int j = i + 1; j < len; j++) {
+                Artist artistI = activeArtists.get(i);
+                Artist artistJ = activeArtists.get(j);
+                if (artistI.totalRevenue() < artistJ.totalRevenue()) {
+                    int rankI = artistI.getRanking();
+                    artistI.setRanking(artistJ.getRanking());
+                    artistJ.setRanking(rankI);
+                    activeArtists.set(i, artistJ);
+                    activeArtists.set(j, artistI);
+                }
+            }
         }
     }
 
