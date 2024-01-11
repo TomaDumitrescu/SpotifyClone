@@ -69,6 +69,7 @@ public final class Admin {
     private final int dateDayHigherLimit = 31;
     private final int dateFebHigherLimit = 28;
     private final double roundTool = 100.0;
+    private final double premiumPrice = 1000000;
     private NotificationManager notificationManager = new NotificationManager();
     private static Admin instance;
 
@@ -1012,7 +1013,13 @@ public final class Admin {
         if (user == null && artist == null && host == null) {
             message.append("Username %s does not exist.".formatted(command.getUsername()));
         } else if (objectNode == null) {
-            message.append("No data to show for user %s.".formatted(command.getUsername()));
+            if (user != null) {
+                message.append("No data to show for user %s.".formatted(command.getUsername()));
+            } else if (artist != null) {
+                message.append("No data to show for artist %s.".formatted(command.getUsername()));
+            } else {
+                message.append("No data to show for host %s.".formatted(command.getUsername()));
+            }
         } else {
             message.append("result");
         }
@@ -1021,13 +1028,15 @@ public final class Admin {
     }
 
     /**
-     * Updates the lists with delete and sort operations
+     * Updates the lists with delete and sort operations, also
+     * calculating the song revenue for each active artist and
+     * sorting the list with total revenue critter
      *
      * @param activeArtists the empty set
      */
     public void setActiveArtists(final ArrayList<Artist> activeArtists) {
         for (Artist artist: artists) {
-            if (artist.getListens() > 0 || artist.getMerchRevenue() > 0) {
+            if (artist.getListens() > 0 || artist.totalRevenue() > 0) {
                 activeArtists.add(artist);
             }
         }
@@ -1038,6 +1047,8 @@ public final class Admin {
         for (Artist artist: activeArtists) {
             artist.setRanking(rank++);
         }
+
+        calculateSongRevenues(activeArtists);
 
         int len = activeArtists.size();
         for (int i = 0; i < len - 1; i++) {
@@ -1053,6 +1064,114 @@ public final class Admin {
                 }
             }
         }
+    }
+
+    /**
+     * Calculates revenues from premium listens and updates the recordedSongs lists
+     *
+     */
+    public void calculatePremiumRevenues(Artist artist) {
+        for (User user: users) {
+            ArrayList<Song> recordedSongs = user.getPlayer().getRecordedSongs();
+            int totalSongs = recordedSongs.size();
+            int totalListened = 0, start = 0, totalProducts = 0;
+            double premiumRevenue;
+
+            for (int i = 0; i < totalSongs; i++) {
+                Song song = recordedSongs.get(i);
+                if (song.isPremiumListen()) {
+                    totalProducts++;
+                }
+
+                if (song.isPremiumListen() && song.getArtist().equals(artist.getUsername())) {
+                    start = i;
+                    totalListened++;
+                }
+
+                if ((!song.isPremiumListen() || i == totalSongs - 1)
+                        && totalListened != 0) {
+                    premiumRevenue = premiumPrice * totalListened / totalProducts;
+
+                    double currentRevenue;
+                    for (int j = start; j < i; j++) {
+                        currentRevenue = recordedSongs.get(j).getRevenue();
+                        recordedSongs.get(j).setRevenue(currentRevenue + premiumRevenue / totalListened);
+                    }
+                    if (i == totalSongs - 1) {
+                        currentRevenue = recordedSongs.get(i).getRevenue();
+                        recordedSongs.get(i).setRevenue(currentRevenue + premiumRevenue / totalListened);
+                    }
+
+                    artist.setSongRevenue(artist.getSongRevenue() + premiumRevenue);
+                    totalListened = 0;
+                    totalProducts = 0;
+                }
+            }
+        }
+    }
+
+    /**
+     * Updates song revenues and most profitable songs based on what
+     * users listened.
+     *
+     * @param activeArtists the arraylist of active artists
+     */
+    public void calculateSongRevenues(ArrayList<Artist> activeArtists) {
+        for (Artist artist: activeArtists) {
+            calculatePremiumRevenues(artist);
+        }
+
+        for (Artist artist: activeArtists) {
+            updateMostProfitableSong(artist);
+        }
+    }
+
+    /**
+     * If the song exist in artistSongs, it increases the revenue.
+     * Otherwise, the song is added in the list.
+     *
+     * @param song the song
+     * @param artistSongs the list of artist songs
+     */
+    public void addSongRevenue(Song song, ArrayList<Song> artistSongs) {
+        for (Song songItr: artistSongs) {
+            if (song.getName().equals(songItr.getName())) {
+                songItr.setRevenue(songItr.getRevenue() + song.getRevenue());
+                return;
+            }
+        }
+
+        artistSongs.add(song);
+    }
+
+    /**
+     * Based on the revenues from recordedSongs, the most profitable
+     * song per artist is updated
+     *
+     * @param artist the artists
+     */
+    public void updateMostProfitableSong(Artist artist) {
+        ArrayList<Song> artistSongs = new ArrayList<>();
+
+        for (User user: users) {
+            ArrayList<Song> recordedSongs = user.getPlayer().getRecordedSongs();
+            for (Song song: recordedSongs) {
+                if (song.getArtist().equals(artist.getUsername())) {
+                    addSongRevenue(song, artistSongs);
+                }
+            }
+        }
+
+        String mostProfitableSong = "N/A";
+        double biggestRevenue = 0;
+        for (Song artistSong : artistSongs) {
+            if (artistSong.getRevenue() > biggestRevenue) {
+                mostProfitableSong = artistSong.getName();
+                biggestRevenue = artistSong.getRevenue();
+            }
+        }
+
+        artist.setMostProfitableSong(mostProfitableSong);
     }
 
     /**

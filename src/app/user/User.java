@@ -19,7 +19,6 @@ import app.searchBar.SearchBar;
 import app.notifications.Notification;
 import app.notifications.Observer;
 import app.utils.Enums;
-import com.fasterxml.jackson.core.util.RequestPayload;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -83,6 +82,9 @@ public final class User extends UserAbstract implements Observer, PayStrategy {
     private final int randSongsSecondGenre = 3;
     private final int randSongsThirdGenre = 2;
     private final int topReference = 5;
+    @Getter
+    @Setter
+    private boolean premiumType;
 
     /**
      * Instantiates a new User.
@@ -105,6 +107,7 @@ public final class User extends UserAbstract implements Observer, PayStrategy {
         searchBar = new SearchBar(username);
         lastSearched = false;
         status = true;
+        premiumType = false;
 
         homePage = new HomePage(getLikedSongs(), getFollowedPlaylists());
         currentPage = homePage;

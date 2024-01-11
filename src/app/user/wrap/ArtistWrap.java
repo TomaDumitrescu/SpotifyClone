@@ -128,7 +128,7 @@ public final class ArtistWrap implements Wrap {
 
         sortData(topAlbums, topSongs, topUsers);
 
-        if (emptyData(topSongs, topAlbums, topUsers)) {
+        if (emptyData(topSongs, topAlbums, topUsers) || listeners == 0) {
             return null;
         }
 
@@ -145,6 +145,7 @@ public final class ArtistWrap implements Wrap {
             if (user.getValue() == 0) {
                 break;
             }
+
             printUsers.add(user.getKey());
         }
 

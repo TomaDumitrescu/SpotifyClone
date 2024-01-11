@@ -1,12 +1,14 @@
 package app.user;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import app.audio.Collections.Album;
 import app.audio.Collections.AlbumOutput;
 import app.audio.Files.Song;
 
+import app.audio.RecordedEntry;
 import app.pages.ArtistPage;
 import lombok.Getter;
 import lombok.Setter;

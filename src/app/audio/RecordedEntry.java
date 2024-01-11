@@ -12,6 +12,7 @@ public class RecordedEntry extends LibraryEntry {
     private String creator;
     private String type;
     private String genre;
+    double price;
 
     /**
      * Constructor for recorded entry
@@ -24,6 +25,7 @@ public class RecordedEntry extends LibraryEntry {
         super(name);
         this.creator = creator;
         this.type = type;
+        price = 0;
     }
 
     /**

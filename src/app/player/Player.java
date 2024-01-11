@@ -11,6 +11,7 @@ import app.audio.RecordedEntry;
 import app.user.Artist;
 import app.utils.Enums;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,6 +34,11 @@ public final class Player {
     private HashMap<RecordedEntry, Integer> recordedEntries = new HashMap<>();
     @Getter
     private HashMap<String, Integer> listenedGenres = new HashMap<>();
+    @Getter
+    private ArrayList<Song> recordedSongs= new ArrayList<>();
+    @Getter
+    @Setter
+    private boolean premiumListen = false;
 
 
     /**
@@ -354,19 +360,27 @@ public final class Player {
             return;
         }
 
-        if (type.equals("song") || type.equals("album")) {
+        if (type.equals("song") || type.equals("album") || type.equals("ad")) {
             Song song = (Song) current;
             rec = new RecordedEntry(song.getName(), song.getArtist(), "song");
             rec.setGenre(song.getGenre());
+
+            Song copySong = new Song(song.getName(), song.getDuration(), song.getAlbum(),
+                    song.getTags(), song.getLyrics(), song.getGenre(), song.getReleaseYear(), song.getArtist());
+            copySong.setPremiumListen(premiumListen);
+            recordedSongs.add(copySong);
+
             listenedGenres.put(song.getGenre(),
                     listenedGenres.getOrDefault(song.getGenre(), 0) + 1);
             List<Artist> artists = Admin.getInstance().getArtists();
+
             for (Artist artist: artists) {
                 if (artist.getUsername().equalsIgnoreCase(song.getArtist())) {
                     artist.setListens(artist.getListens() + 2);
                     break;
                 }
             }
+
             Admin.getInstance().setArtists(artists);
             recordedEntries.put(rec, recordedEntries.getOrDefault(rec, 0) + 1);
 

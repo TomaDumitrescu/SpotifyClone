@@ -1022,4 +1022,62 @@ public final class CommandRunner {
 
         return objectNode;
     }
+
+    /**
+     * Command to update the user to premium subscription
+     *
+     * @param commandInput the command input
+     * @return the object node
+     */
+    public static ObjectNode buyPremium(final CommandInput commandInput) {
+        User user = admin.getUser(commandInput.getUsername());
+        String message;
+
+        if (user == null) {
+            message = "The username %s doesn't exist.".formatted(commandInput.getUsername());
+        } else if (user.isPremiumType()){
+            message = "%s is already a premium user.".formatted(commandInput.getUsername());
+        } else {
+            user.setPremiumType(true);
+            user.getPlayer().setPremiumListen(true);
+            message = "%s bought the subscription successfully.".formatted(commandInput.getUsername());
+        }
+
+        ObjectNode objectNode = objectMapper.createObjectNode();
+        objectNode.put("command", commandInput.getCommand());
+        objectNode.put("user", commandInput.getUsername());
+        objectNode.put("timestamp", commandInput.getTimestamp());
+        objectNode.put("message", message);
+
+        return objectNode;
+    }
+
+    /**
+     * Command to update the user to free subscription
+     *
+     * @param commandInput the command input
+     * @return the object node
+     */
+    public static ObjectNode cancelPremium(final CommandInput commandInput) {
+        User user = admin.getUser(commandInput.getUsername());
+        String message;
+
+        if (user == null) {
+            message = "The username %s doesn't exist.".formatted(commandInput.getUsername());
+        } else if (!user.isPremiumType()){
+            message = "%s is not a premium user.".formatted(commandInput.getUsername());
+        } else {
+            user.setPremiumType(false);
+            user.getPlayer().setPremiumListen(false);
+            message = "%s cancelled the subscription successfully.".formatted(commandInput.getUsername());
+        }
+
+        ObjectNode objectNode = objectMapper.createObjectNode();
+        objectNode.put("command", commandInput.getCommand());
+        objectNode.put("user", commandInput.getUsername());
+        objectNode.put("timestamp", commandInput.getTimestamp());
+        objectNode.put("message", message);
+
+        return objectNode;
+    }
 }

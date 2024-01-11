@@ -1,6 +1,7 @@
 package app.audio.Files;
 
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +18,10 @@ public final class Song extends AudioFile {
     private final Integer releaseYear;
     private final String artist;
     private Integer likes;
+    @Setter
+    private boolean premiumListen;
+    @Setter
+    private double revenue;
 
     /**
      * Instantiates a new Song.
@@ -41,6 +46,8 @@ public final class Song extends AudioFile {
         this.releaseYear = releaseYear;
         this.artist = artist;
         this.likes = 0;
+        premiumListen = false;
+        revenue = 0;
     }
 
     @Override

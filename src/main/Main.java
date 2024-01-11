@@ -139,8 +139,8 @@ public final class Main {
                 case "showAlbums" -> outputs.add(CommandRunner.showAlbums(command));
                 case "showPodcasts" -> outputs.add(CommandRunner.showPodcasts(command));
                 case "wrapped" -> outputs.add(CommandRunner.wrapped(command));
-                case "buyPremium" -> outputs.add("");
-                case "cancelPremium" -> outputs.add("");
+                case "buyPremium" -> outputs.add(CommandRunner.buyPremium(command));
+                case "cancelPremium" -> outputs.add(CommandRunner.cancelPremium(command));
                 case "adBreak" -> outputs.add("");
                 case "subscribe" -> outputs.add(CommandRunner.subscribe(command));
                 case "getNotifications" -> outputs.add(CommandRunner.getNotifications(command));
