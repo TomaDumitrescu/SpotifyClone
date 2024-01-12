@@ -35,10 +35,12 @@ public final class Player {
     @Getter
     private HashMap<String, Integer> listenedGenres = new HashMap<>();
     @Getter
-    private ArrayList<Song> recordedSongs= new ArrayList<>();
+    private ArrayList<Song> recordedSongs = new ArrayList<>();
     @Getter
     @Setter
     private boolean premiumListen = false;
+    @Setter
+    private Song ad;
 
 
     /**
@@ -47,6 +49,7 @@ public final class Player {
     public Player() {
         this.repeatMode = Enums.RepeatMode.NO_REPEAT;
         this.paused = true;
+        this.ad = null;
     }
 
     /**
@@ -117,6 +120,13 @@ public final class Player {
     public void setSource(final LibraryEntry entry, final String sourceType) {
         if ("podcast".equals(this.type)) {
             bookmarkPodcast();
+        }
+
+        if (entry.getName().equals("Ad Break")) {
+            ad = (Song) entry;
+            return;
+        } else {
+            ad = null;
         }
 
         this.type = sourceType;
@@ -209,6 +219,10 @@ public final class Player {
      * Next.
      */
     public void next() {
+        if (ad != null) {
+            recordAd();
+        }
+
         paused = source.setNextAudioFile(repeatMode, shuffle);
         if (repeatMode == Enums.RepeatMode.REPEAT_ONCE) {
             repeatMode = Enums.RepeatMode.NO_REPEAT;
@@ -332,7 +346,7 @@ public final class Player {
         if (collection) {
             AudioCollection current = getCurrentAudioCollection();
 
-            if (current == null) {
+            if (current == null || current.getName().equals("Buy Premium")) {
                 return;
             }
 
@@ -360,15 +374,22 @@ public final class Player {
             return;
         }
 
-        if (type.equals("song") || type.equals("album") || type.equals("ad")) {
+        if (type.equals("song") || type.equals("album")) {
             Song song = (Song) current;
             rec = new RecordedEntry(song.getName(), song.getArtist(), "song");
             rec.setGenre(song.getGenre());
 
             Song copySong = new Song(song.getName(), song.getDuration(), song.getAlbum(),
-                    song.getTags(), song.getLyrics(), song.getGenre(), song.getReleaseYear(), song.getArtist());
+                    song.getTags(), song.getLyrics(), song.getGenre(),
+                    song.getReleaseYear(), song.getArtist());
             copySong.setPremiumListen(premiumListen);
+            copySong.setPrice(song.getPrice());
+
             recordedSongs.add(copySong);
+
+            if (song.getName().equals("Ad Break")) {
+                return;
+            }
 
             listenedGenres.put(song.getGenre(),
                     listenedGenres.getOrDefault(song.getGenre(), 0) + 1);
@@ -412,5 +433,19 @@ public final class Player {
     public void addRecord() {
         setRecord(true);
         setRecord(false);
+    }
+
+    /**
+     * Records an ad, separately from the audio files recording
+     *
+     */
+    public void recordAd() {
+        Song copySong = new Song(ad.getName(), ad.getDuration(), ad.getAlbum(),
+                ad.getTags(), ad.getLyrics(), ad.getGenre(),
+                ad.getReleaseYear(), ad.getArtist());
+        copySong.setPremiumListen(premiumListen);
+        copySong.setPrice(ad.getPrice());
+
+        recordedSongs.add(copySong);
     }
 }

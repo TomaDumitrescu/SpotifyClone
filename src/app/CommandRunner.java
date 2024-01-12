@@ -7,14 +7,12 @@ import app.player.PlayerStats;
 import app.searchBar.Filters;
 import app.user.Artist;
 import app.user.Host;
-import app.user.Merchandise;
 import app.user.User;
 import app.notifications.Notification;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import fileio.input.CommandInput;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -1035,12 +1033,13 @@ public final class CommandRunner {
 
         if (user == null) {
             message = "The username %s doesn't exist.".formatted(commandInput.getUsername());
-        } else if (user.isPremiumType()){
+        } else if (user.isPremiumType()) {
             message = "%s is already a premium user.".formatted(commandInput.getUsername());
         } else {
             user.setPremiumType(true);
             user.getPlayer().setPremiumListen(true);
-            message = "%s bought the subscription successfully.".formatted(commandInput.getUsername());
+            message = "%s bought the subscription successfully."
+                    .formatted(commandInput.getUsername());
         }
 
         ObjectNode objectNode = objectMapper.createObjectNode();
@@ -1063,13 +1062,40 @@ public final class CommandRunner {
         String message;
 
         if (user == null) {
-            message = "The username %s doesn't exist.".formatted(commandInput.getUsername());
-        } else if (!user.isPremiumType()){
+            message = "The username %s doesn't exist."
+                    .formatted(commandInput.getUsername());
+        } else if (!user.isPremiumType()) {
             message = "%s is not a premium user.".formatted(commandInput.getUsername());
         } else {
             user.setPremiumType(false);
             user.getPlayer().setPremiumListen(false);
-            message = "%s cancelled the subscription successfully.".formatted(commandInput.getUsername());
+            message = "%s cancelled the subscription successfully."
+                    .formatted(commandInput.getUsername());
+        }
+
+        ObjectNode objectNode = objectMapper.createObjectNode();
+        objectNode.put("command", commandInput.getCommand());
+        objectNode.put("user", commandInput.getUsername());
+        objectNode.put("timestamp", commandInput.getTimestamp());
+        objectNode.put("message", message);
+
+        return objectNode;
+    }
+
+    /**
+     * Loads the ad as a song
+     *
+     * @param commandInput the command input
+     * @return the object node
+     */
+    public static ObjectNode adBreak(final CommandInput commandInput) {
+        User user = admin.getUser(commandInput.getUsername());
+        String message;
+
+        if (user == null) {
+            message = "The username %s doesn't exist.".formatted(commandInput.getUsername());
+        } else {
+            message = admin.adBreak(user, commandInput.getPrice());
         }
 
         ObjectNode objectNode = objectMapper.createObjectNode();

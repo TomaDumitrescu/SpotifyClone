@@ -12,7 +12,7 @@ public class RecordedEntry extends LibraryEntry {
     private String creator;
     private String type;
     private String genre;
-    double price;
+    private double price;
 
     /**
      * Constructor for recorded entry

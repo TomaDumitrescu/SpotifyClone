@@ -84,7 +84,10 @@ public final class Main {
         SearchBar.updateAdmin();
         admin.setUsers(library.getUsers());
         admin.initializeObservers();
+
         admin.setSongs(library.getSongs());
+        admin.setAd();
+
         admin.setPodcasts(library.getPodcasts());
         CommandRunner.updateAdmin();
 
@@ -141,7 +144,7 @@ public final class Main {
                 case "wrapped" -> outputs.add(CommandRunner.wrapped(command));
                 case "buyPremium" -> outputs.add(CommandRunner.buyPremium(command));
                 case "cancelPremium" -> outputs.add(CommandRunner.cancelPremium(command));
-                case "adBreak" -> outputs.add("");
+                case "adBreak" -> outputs.add(CommandRunner.adBreak(command));
                 case "subscribe" -> outputs.add(CommandRunner.subscribe(command));
                 case "getNotifications" -> outputs.add(CommandRunner.getNotifications(command));
                 case "buyMerch" -> outputs.add(CommandRunner.buyMerch(command));

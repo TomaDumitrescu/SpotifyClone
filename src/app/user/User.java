@@ -1063,7 +1063,8 @@ public final class User extends UserAbstract implements Observer, PayStrategy {
     }
 
     @Override
-    public void pay(Double price, Artist seller, String productType) {
+    public void pay(final Double price, final Artist seller,
+                    final String productType) {
         if (productType.equals("song")) {
             seller.setSongRevenue(seller.getSongRevenue() + price);
         } else if (productType.equals("merchandise")) {

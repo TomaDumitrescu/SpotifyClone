@@ -71,6 +71,8 @@ public final class Admin {
     private final double roundTool = 100.0;
     private final double premiumPrice = 1000000;
     private NotificationManager notificationManager = new NotificationManager();
+    @Setter
+    private Song ad;
     private static Admin instance;
 
     private Admin() {
@@ -116,6 +118,21 @@ public final class Admin {
             songs.add(new Song(songInput.getName(), songInput.getDuration(), songInput.getAlbum(),
                     songInput.getTags(), songInput.getLyrics(), songInput.getGenre(),
                     songInput.getReleaseYear(), songInput.getArtist()));
+        }
+    }
+
+    /**
+     * Store the ad type in a song class
+     *
+     */
+    public void setAd() {
+        for (Song song: songs) {
+            if (song.getName().equals("Ad Break")) {
+                ad = new Song(song.getName(), song.getDuration(), song.getAlbum(),
+                        song.getTags(), song.getLyrics(), song.getGenre(), song.getReleaseYear(),
+                        song.getArtist());
+                break;
+            }
         }
     }
 
@@ -684,7 +701,7 @@ public final class Admin {
      *
      * @return the command message
      */
-    public String buyMerch(User user, String merchandiseName) {
+    public String buyMerch(final User user, final String merchandiseName) {
         Artist accessedArtist = null;
         for (Artist artist: artists) {
             if (user.getCurrentPage() == artist.getPage()) {
@@ -1070,9 +1087,10 @@ public final class Admin {
      * Calculates revenues from premium listens and updates the recordedSongs lists
      *
      */
-    public void calculatePremiumRevenues(Artist artist) {
+    public void calculatePremiumRevenues(final Artist artist) {
         for (User user: users) {
             ArrayList<Song> recordedSongs = user.getPlayer().getRecordedSongs();
+
             int totalSongs = recordedSongs.size();
             int totalListened = 0, start = 0, totalProducts = 0;
             double premiumRevenue;
@@ -1095,11 +1113,13 @@ public final class Admin {
                     double currentRevenue;
                     for (int j = start; j < i; j++) {
                         currentRevenue = recordedSongs.get(j).getRevenue();
-                        recordedSongs.get(j).setRevenue(currentRevenue + premiumRevenue / totalListened);
+                        recordedSongs.get(j).setRevenue(currentRevenue + premiumRevenue
+                                / totalListened);
                     }
                     if (i == totalSongs - 1) {
                         currentRevenue = recordedSongs.get(i).getRevenue();
-                        recordedSongs.get(i).setRevenue(currentRevenue + premiumRevenue / totalListened);
+                        recordedSongs.get(i).setRevenue(currentRevenue + premiumRevenue
+                                / totalListened);
                     }
 
                     artist.setSongRevenue(artist.getSongRevenue() + premiumRevenue);
@@ -1111,14 +1131,56 @@ public final class Admin {
     }
 
     /**
+     * Calculates revenues from ads
+     *
+     */
+    public void calculateAdRevenues(final Artist artist) {
+        for (User user: users) {
+            ArrayList<Song> recordedSongs = user.getPlayer().getRecordedSongs();
+            int totalSongs = recordedSongs.size();
+            int totalListened = 0, start = 0;
+            double adRevenue, songLast;
+
+            for (int i = 0; i < totalSongs; i++) {
+                Song song = recordedSongs.get(i);
+                if (!song.isPremiumListen() && song.getArtist().equals(artist.getUsername())) {
+                    totalListened++;
+                }
+
+                if (song.getName().equals("Ad Break") && i != start) {
+                    songLast = i - start;
+                    adRevenue = ((double) song.getPrice()) * totalListened / songLast;
+
+                    double currentRevenue;
+                    for (int j = start; j < i; j++) {
+                        currentRevenue = recordedSongs.get(j).getRevenue();
+                        if (!recordedSongs.get(i).isPremiumListen()) {
+                            recordedSongs.get(j).setRevenue(currentRevenue + adRevenue / songLast);
+                        }
+                    }
+                    if (i == totalSongs - 1 && !recordedSongs.get(i).isPremiumListen()) {
+                        currentRevenue = recordedSongs.get(i).getRevenue();
+                        recordedSongs.get(i).setRevenue(currentRevenue + adRevenue / songLast);
+                    }
+
+                    artist.setSongRevenue(artist.getSongRevenue() + adRevenue);
+                    totalListened = 0;
+                    start = i + 1;
+                }
+            }
+        }
+    }
+
+    /**
      * Updates song revenues and most profitable songs based on what
      * users listened.
      *
      * @param activeArtists the arraylist of active artists
      */
-    public void calculateSongRevenues(ArrayList<Artist> activeArtists) {
+    public void calculateSongRevenues(final ArrayList<Artist> activeArtists) {
         for (Artist artist: activeArtists) {
             calculatePremiumRevenues(artist);
+            calculateAdRevenues(artist);
         }
 
         for (Artist artist: activeArtists) {
@@ -1133,7 +1195,7 @@ public final class Admin {
      * @param song the song
      * @param artistSongs the list of artist songs
      */
-    public void addSongRevenue(Song song, ArrayList<Song> artistSongs) {
+    public void addSongRevenue(final Song song, final ArrayList<Song> artistSongs) {
         for (Song songItr: artistSongs) {
             if (song.getName().equals(songItr.getName())) {
                 songItr.setRevenue(songItr.getRevenue() + song.getRevenue());
@@ -1150,11 +1212,12 @@ public final class Admin {
      *
      * @param artist the artists
      */
-    public void updateMostProfitableSong(Artist artist) {
+    public void updateMostProfitableSong(final Artist artist) {
         ArrayList<Song> artistSongs = new ArrayList<>();
 
         for (User user: users) {
             ArrayList<Song> recordedSongs = user.getPlayer().getRecordedSongs();
+            recordedSongs.removeIf(song -> song.getName().equals("Ad Break"));
             for (Song song: recordedSongs) {
                 if (song.getArtist().equals(artist.getUsername())) {
                     addSongRevenue(song, artistSongs);
@@ -1164,10 +1227,14 @@ public final class Admin {
 
         String mostProfitableSong = "N/A";
         double biggestRevenue = 0;
+
         for (Song artistSong : artistSongs) {
             if (artistSong.getRevenue() > biggestRevenue) {
                 mostProfitableSong = artistSong.getName();
                 biggestRevenue = artistSong.getRevenue();
+            } else if (artistSong.getRevenue() == biggestRevenue && biggestRevenue != 0
+                        && artistSong.getName().compareTo(mostProfitableSong) < 0) {
+                mostProfitableSong = artistSong.getName();
             }
         }
 
@@ -1262,5 +1329,31 @@ public final class Admin {
 
         return "%s unsubscribed from %s successfully."
                 .formatted(user.getUsername(), subscription);
+    }
+
+    /**
+     * Loads an ad on the user player if possible
+     * @param user the user
+     * @param price the ad price
+     * @return the command message
+     */
+    public String adBreak(final User user, final int price) {
+        Player player = user.getPlayer();
+        if (player.getCurrentAudioFile() == null) {
+            return "%s is not playing any music.".formatted(user.getUsername());
+        }
+
+        boolean music = player.getType().equals("song") || player.getType().equals("album");
+
+        if (!music) {
+            return "%s is not playing any music.".formatted(user.getUsername());
+        }
+
+        ad.setPrice(price);
+
+        // player will not actually load the ad, so no paused variable change
+        player.setSource(ad, "song");
+
+        return "Ad inserted successfully.";
     }
 }

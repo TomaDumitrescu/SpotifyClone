@@ -17,6 +17,8 @@ public final class Song extends AudioFile {
     private final String genre;
     private final Integer releaseYear;
     private final String artist;
+    @Setter
+    private int price;
     private Integer likes;
     @Setter
     private boolean premiumListen;
@@ -48,6 +50,7 @@ public final class Song extends AudioFile {
         this.likes = 0;
         premiumListen = false;
         revenue = 0;
+        price = 0;
     }
 
     @Override
