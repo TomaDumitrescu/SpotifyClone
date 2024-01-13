@@ -8,7 +8,6 @@ import app.audio.Files.AudioFile;
 import app.audio.Files.Song;
 import app.audio.LibraryEntry;
 import app.audio.RecordedEntry;
-import app.monetization.PayStrategy;
 import app.pages.HomePage;
 import app.pages.LikedContentPage;
 import app.pages.Page;
@@ -36,7 +35,7 @@ import java.util.stream.Collectors;
 /**
  * The type User.
  */
-public final class User extends UserAbstract implements Observer, PayStrategy {
+public final class User extends UserAbstract implements Observer {
     @Getter
     private ArrayList<Playlist> playlists;
     @Getter
@@ -851,6 +850,7 @@ public final class User extends UserAbstract implements Observer, PayStrategy {
     /**
      * Recommends a playlist based on the user's history of likes
      *
+     * @param users the users
      */
     public void recommendFanPlaylist(final List<User> users) {
         AudioFile audioFile = player.getCurrentAudioFile();
@@ -861,6 +861,7 @@ public final class User extends UserAbstract implements Observer, PayStrategy {
 
         List<Integer> userListens = getListens(users, (Song) audioFile);
 
+        // sort users based on the number of listens of the current audio file artist
         int len = userListens.size() - 1;
         for (int i = 0; i < len - 1; i++) {
             for (int j = 0; j < len; j++) {
@@ -1062,7 +1063,6 @@ public final class User extends UserAbstract implements Observer, PayStrategy {
         return outputNotifications;
     }
 
-    @Override
     public void pay(final Double price, final Artist seller,
                     final String productType) {
         if (productType.equals("song")) {

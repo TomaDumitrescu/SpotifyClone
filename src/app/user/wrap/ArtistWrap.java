@@ -16,7 +16,7 @@ import java.util.Map;
 
 @Getter
 @Setter
-public final class ArtistWrap implements Wrap {
+public final class ArtistWrap implements WrapStrategy {
     private static ArtistWrap instance = null;
     private List<User> users;
     private String username;

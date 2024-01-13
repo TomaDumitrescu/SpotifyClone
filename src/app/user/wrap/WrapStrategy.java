@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
-public interface Wrap {
+public interface WrapStrategy {
     /**
      * Sorting descending by value, then by key audio product name
      *
@@ -73,7 +73,7 @@ public interface Wrap {
     }
 
     /**
-     * Used to generate statics depending on the user type
+     * Command model to generate statics depending on the user type
      *
      * @return the object node
      */

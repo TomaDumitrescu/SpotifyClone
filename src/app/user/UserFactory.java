@@ -13,13 +13,13 @@ public final class UserFactory {
      * @param city the city of the user
      * @return the new user instance
      */
-    public static UserAbstract createUser(final String contentType,
+    public static UserAbstract createUser(final String userType,
                                   final String username, final int age, final String city) {
-        return switch (contentType) {
+        return switch (userType) {
             case "user" -> new User(username, age, city);
             case "artist" -> new Artist(username, age, city);
             case "host" -> new Host(username, age, city);
-            default -> throw new IllegalArgumentException("Not recognized user " + contentType);
+            default -> throw new IllegalArgumentException("Not recognized user " + userType);
         };
     }
 }

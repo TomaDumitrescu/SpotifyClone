@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 @Getter
 @Setter
-public final class UserWrap implements Wrap {
+public final class UserWrap implements WrapStrategy {
     private static UserWrap instance = null;
     private HashMap<RecordedEntry, Integer> recordedEntries;
     private HashMap<String, Integer> listenedGenres;

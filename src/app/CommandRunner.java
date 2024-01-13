@@ -9,6 +9,9 @@ import app.user.Artist;
 import app.user.Host;
 import app.user.User;
 import app.notifications.Notification;
+import app.user.wrap.ArtistWrap;
+import app.user.wrap.HostWrap;
+import app.user.wrap.UserWrap;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import fileio.input.CommandInput;
@@ -791,17 +794,60 @@ public final class CommandRunner {
      * @return the object node (message or complex data structure)
      */
     public static ObjectNode wrapped(final CommandInput commandInput) {
-        StringBuilder format = new StringBuilder();
-        ObjectNode result = admin.wrapped(commandInput, format);
+        StringBuilder message = new StringBuilder();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        ObjectNode result = objectMapper.createObjectNode();
+
+        User user = admin.getUser(commandInput.getUsername());
+        UserWrap userWrap = UserWrap.getInstance();
+
+        Artist artist = admin.getArtist(commandInput.getUsername());
+        ArtistWrap artistWrap = ArtistWrap.getInstance();
+
+        Host host = admin.getHost(commandInput.getUsername());
+        HostWrap hostWrap = HostWrap.getInstance();
+
+        if (user != null && user.getPlayer() != null) {
+            userWrap.setRecordedEntries(user.getPlayer().getRecordedEntries());
+            userWrap.setListenedGenres(user.getPlayer().getListenedGenres());
+            result = admin.wrapped(userWrap);
+        } else if (artist != null) {
+            artistWrap.setUsers(admin.getUsers());
+            artistWrap.setUsername(artist.getUsername());
+            result = admin.wrapped(artistWrap);
+        } else if (host != null) {
+            hostWrap.setUsers(admin.getUsers());
+            hostWrap.setUsername(host.getUsername());
+            result = hostWrap.generateStatistics();
+        }
+
+        if (user == null && artist == null && host == null) {
+            message.append("Username %s does not exist."
+                    .formatted(commandInput.getUsername()));
+        } else if (result == null) {
+            if (user != null) {
+                message.append("No data to show for user %s."
+                        .formatted(commandInput.getUsername()));
+            } else if (artist != null) {
+                message.append("No data to show for artist %s."
+                        .formatted(commandInput.getUsername()));
+            } else {
+                message.append("No data to show for host %s."
+                        .formatted(commandInput.getUsername()));
+            }
+        } else {
+            message.append("result");
+        }
 
         ObjectNode objectNode = objectMapper.createObjectNode();
         objectNode.put("command", commandInput.getCommand());
         objectNode.put("user", commandInput.getUsername());
         objectNode.put("timestamp", commandInput.getTimestamp());
-        if (format.toString().equals("result")) {
+        if (message.toString().equals("result")) {
             objectNode.put("result", result);
         } else {
-            objectNode.put("message", format.toString());
+            objectNode.put("message", message.toString());
         }
 
         return objectNode;

@@ -22,6 +22,7 @@ import app.notifications.NotificationManager;
 import app.user.wrap.ArtistWrap;
 import app.user.wrap.HostWrap;
 import app.user.wrap.UserWrap;
+import app.user.wrap.WrapStrategy;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import fileio.input.CommandInput;
@@ -997,51 +998,11 @@ public final class Admin {
     /**
      * Calls methods from the wrap classes to generate statistics
      *
-     * @param command the command
+     * @param statisticsStrategy the statistics strategy
      * @return the object node
      */
-    public ObjectNode wrapped(final CommandInput command, final StringBuilder message) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        ObjectNode objectNode = objectMapper.createObjectNode();
-
-        User user = getUser(command.getUsername());
-        UserWrap userWrap = UserWrap.getInstance();
-
-        Artist artist = getArtist(command.getUsername());
-        ArtistWrap artistWrap = ArtistWrap.getInstance();
-
-        Host host = getHost(command.getUsername());
-        HostWrap hostWrap = HostWrap.getInstance();
-
-        if (user != null && user.getPlayer() != null) {
-            userWrap.setRecordedEntries(user.getPlayer().getRecordedEntries());
-            userWrap.setListenedGenres(user.getPlayer().getListenedGenres());
-            objectNode = userWrap.generateStatistics();
-        } else if (artist != null) {
-            artistWrap.setUsers(users);
-            artistWrap.setUsername(artist.getUsername());
-            objectNode = artistWrap.generateStatistics();
-        } else if (host != null) {
-            hostWrap.setUsers(users);
-            hostWrap.setUsername(host.getUsername());
-            objectNode = hostWrap.generateStatistics();
-        }
-
-        if (user == null && artist == null && host == null) {
-            message.append("Username %s does not exist.".formatted(command.getUsername()));
-        } else if (objectNode == null) {
-            if (user != null) {
-                message.append("No data to show for user %s.".formatted(command.getUsername()));
-            } else if (artist != null) {
-                message.append("No data to show for artist %s.".formatted(command.getUsername()));
-            } else {
-                message.append("No data to show for host %s.".formatted(command.getUsername()));
-            }
-        } else {
-            message.append("result");
-        }
-
-        return objectNode;
+    public ObjectNode wrapped(WrapStrategy statisticsStrategy) {
+        return statisticsStrategy.generateStatistics();
     }
 
     /**
@@ -1092,17 +1053,20 @@ public final class Admin {
             ArrayList<Song> recordedSongs = user.getPlayer().getRecordedSongs();
 
             int totalSongs = recordedSongs.size();
-            int totalListened = 0, start = 0, totalProducts = 0;
+            int totalListened = 0, start = -1, totalProducts = 0;
             double premiumRevenue;
 
             for (int i = 0; i < totalSongs; i++) {
                 Song song = recordedSongs.get(i);
-                if (song.isPremiumListen()) {
+                if (song.isPremiumListen() && !song.getName().equals("Ad Break")) {
                     totalProducts++;
                 }
 
-                if (song.isPremiumListen() && song.getArtist().equals(artist.getUsername())) {
+                if (start == -1 && song.isPremiumListen()) {
                     start = i;
+                }
+
+                if (song.isPremiumListen() && song.getArtist().equals(artist.getUsername())) {
                     totalListened++;
                 }
 
@@ -1112,11 +1076,24 @@ public final class Admin {
 
                     double currentRevenue;
                     for (int j = start; j < i; j++) {
-                        currentRevenue = recordedSongs.get(j).getRevenue();
-                        recordedSongs.get(j).setRevenue(currentRevenue + premiumRevenue
+                        Song songItr = recordedSongs.get(j);
+                        if (!songItr.getArtist().equals(artist.getUsername())) {
+                            continue;
+                        }
+
+                        if (songItr.getName().equals("Ad Break") || !songItr.isPremiumListen()) {
+                            continue;
+                        }
+
+                        currentRevenue = songItr.getRevenue();
+                        songItr.setRevenue(currentRevenue + premiumRevenue
                                 / totalListened);
                     }
-                    if (i == totalSongs - 1) {
+
+                    Song songItr = recordedSongs.get(i);
+                    if (i == totalSongs - 1 && songItr.isPremiumListen()
+                        && !songItr.getName().equals("Ad Break")
+                            && songItr.getArtist().equals(artist.getUsername())) {
                         currentRevenue = recordedSongs.get(i).getRevenue();
                         recordedSongs.get(i).setRevenue(currentRevenue + premiumRevenue
                                 / totalListened);
@@ -1125,6 +1102,7 @@ public final class Admin {
                     artist.setSongRevenue(artist.getSongRevenue() + premiumRevenue);
                     totalListened = 0;
                     totalProducts = 0;
+                    start = -1;
                 }
             }
         }
@@ -1133,12 +1111,13 @@ public final class Admin {
     /**
      * Calculates revenues from ads
      *
+     * @param artist the artist
      */
     public void calculateAdRevenues(final Artist artist) {
         for (User user: users) {
             ArrayList<Song> recordedSongs = user.getPlayer().getRecordedSongs();
             int totalSongs = recordedSongs.size();
-            int totalListened = 0, start = 0;
+            int totalListened = 0, start = 0, totalProducts = 0;
             double adRevenue, songLast;
 
             for (int i = 0; i < totalSongs; i++) {
@@ -1147,18 +1126,27 @@ public final class Admin {
                     totalListened++;
                 }
 
+                if (!song.isPremiumListen() && !song.getName().equals("Ad Break")) {
+                    totalProducts++;
+                }
+
                 if (song.getName().equals("Ad Break") && i != start) {
                     songLast = i - start;
-                    adRevenue = ((double) song.getPrice()) * totalListened / songLast;
+                    adRevenue = ((double) song.getPrice()) * totalListened / totalProducts;
 
                     double currentRevenue;
                     for (int j = start; j < i; j++) {
-                        currentRevenue = recordedSongs.get(j).getRevenue();
-                        if (!recordedSongs.get(i).isPremiumListen()) {
-                            recordedSongs.get(j).setRevenue(currentRevenue + adRevenue / songLast);
+                        Song songItr = recordedSongs.get(j);
+                        if (songItr.isPremiumListen() || songItr.getName().equals("Ad Break")) {
+                            continue;
                         }
+
+                        currentRevenue = recordedSongs.get(j).getRevenue();
+                        recordedSongs.get(j).setRevenue(currentRevenue + adRevenue / songLast);
                     }
-                    if (i == totalSongs - 1 && !recordedSongs.get(i).isPremiumListen()) {
+
+                    if (i == totalSongs - 1 && !recordedSongs.get(i).isPremiumListen()
+                        && !recordedSongs.get(i).getName().equals("Ad Break")) {
                         currentRevenue = recordedSongs.get(i).getRevenue();
                         recordedSongs.get(i).setRevenue(currentRevenue + adRevenue / songLast);
                     }
@@ -1166,6 +1154,7 @@ public final class Admin {
                     artist.setSongRevenue(artist.getSongRevenue() + adRevenue);
                     totalListened = 0;
                     start = i + 1;
+                    totalProducts = 0;
                 }
             }
         }
@@ -1225,6 +1214,18 @@ public final class Admin {
             }
         }
 
+        String mostProfitableSong = getMostProfitableSong(artistSongs);
+        artist.setMostProfitableSong(mostProfitableSong);
+    }
+
+    /**
+     * Calculates the most profitable song, considering it's revenue
+     * Equality case, then lexicographical order
+     *
+     * @param artistSongs the list of the artist songs listened by users
+     * @return the most profitable song
+     */
+    private String getMostProfitableSong(ArrayList<Song> artistSongs) {
         String mostProfitableSong = "N/A";
         double biggestRevenue = 0;
 
@@ -1237,8 +1238,7 @@ public final class Admin {
                 mostProfitableSong = artistSong.getName();
             }
         }
-
-        artist.setMostProfitableSong(mostProfitableSong);
+        return mostProfitableSong;
     }
 
     /**

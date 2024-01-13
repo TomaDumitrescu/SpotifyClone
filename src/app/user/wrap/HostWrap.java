@@ -15,7 +15,7 @@ import java.util.Map;
 
 @Getter
 @Setter
-public final class HostWrap implements Wrap {
+public final class HostWrap implements WrapStrategy {
     private static HostWrap instance = null;
     private List<User> users;
     private String username;

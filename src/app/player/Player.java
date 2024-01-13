@@ -219,16 +219,16 @@ public final class Player {
      * Next.
      */
     public void next() {
-        if (ad != null) {
-            recordAd();
-        }
-
         paused = source.setNextAudioFile(repeatMode, shuffle);
         if (repeatMode == Enums.RepeatMode.REPEAT_ONCE) {
             repeatMode = Enums.RepeatMode.NO_REPEAT;
         }
 
         if (source.getDuration() == 0 && paused) {
+            if (ad != null) {
+                recordAd();
+            }
+
             stop();
         } else {
             addRecord();
