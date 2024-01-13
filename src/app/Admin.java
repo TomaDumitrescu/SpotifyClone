@@ -19,9 +19,6 @@ import app.user.Announcement;
 import app.user.Merchandise;
 import app.notifications.Notification;
 import app.notifications.NotificationManager;
-import app.user.wrap.ArtistWrap;
-import app.user.wrap.HostWrap;
-import app.user.wrap.UserWrap;
 import app.user.wrap.WrapStrategy;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -434,6 +431,7 @@ public final class Admin {
                 commandInput.getReleaseYear());
         currentArtist.getAlbums().add(album);
 
+        // real time notification
         Notification notification = new Notification("New Album",
                 "New Album from " + username + ".");
         notificationManager.notifyObservers(notification, username);
@@ -699,7 +697,10 @@ public final class Admin {
     }
 
     /**
+     * Increase the artist merch revenue and share merch with a user
      *
+     * @param user the user
+     * @param merchandiseName the merchandise name
      * @return the command message
      */
     public String buyMerch(final User user, final String merchandiseName) {
@@ -731,7 +732,7 @@ public final class Admin {
         ArrayList<String> purchasedMerch = user.getPurchasedMerch();
         purchasedMerch.add(merchandiseName);
         user.setPurchasedMerch(purchasedMerch);
-        user.pay((double) targetedMerch.getPrice(), accessedArtist, "merchandise");
+        user.pay((double) targetedMerch.getPrice(), accessedArtist);
 
         return "%s has added new merch successfully.".formatted(user.getUsername());
     }
@@ -836,6 +837,7 @@ public final class Admin {
                 user.setCurrentPage(user.getLikedContentPage());
                 ArrayList<Page> pageHistory = user.getPageHistory();
                 pageHistory.add(user.getLikedContentPage());
+
                 // history reset for forward
                 user.setPageIndex(pageHistory.size() - 1);
                 user.setPageHistory(pageHistory);
@@ -1001,7 +1003,7 @@ public final class Admin {
      * @param statisticsStrategy the statistics strategy
      * @return the object node
      */
-    public ObjectNode wrapped(WrapStrategy statisticsStrategy) {
+    public ObjectNode wrapped(final WrapStrategy statisticsStrategy) {
         return statisticsStrategy.generateStatistics();
     }
 
@@ -1047,6 +1049,7 @@ public final class Admin {
     /**
      * Calculates revenues from premium listens and updates the recordedSongs lists
      *
+     * @param artist the artist
      */
     public void calculatePremiumRevenues(final Artist artist) {
         for (User user: users) {
@@ -1225,7 +1228,7 @@ public final class Admin {
      * @param artistSongs the list of the artist songs listened by users
      * @return the most profitable song
      */
-    private String getMostProfitableSong(ArrayList<Song> artistSongs) {
+    private String getMostProfitableSong(final ArrayList<Song> artistSongs) {
         String mostProfitableSong = "N/A";
         double biggestRevenue = 0;
 
@@ -1248,24 +1251,25 @@ public final class Admin {
      */
     public ObjectNode endProgram() {
         ObjectMapper objectMapper = new ObjectMapper();
-        ObjectNode objectNode = objectMapper.createObjectNode(), iter;
+        ObjectNode objectNode = objectMapper.createObjectNode(), nodeIter;
         ObjectNode resultNode = objectMapper.createObjectNode();
 
         objectNode.put("command", "endProgram");
 
         ArrayList<Artist> activeArtists = new ArrayList<>();
+
         setActiveArtists(activeArtists);
 
         for (Artist artist: activeArtists) {
-            iter = objectMapper.createObjectNode();
-            iter.put("merchRevenue",
+            nodeIter = objectMapper.createObjectNode();
+            nodeIter.put("merchRevenue",
                     Math.round(artist.getMerchRevenue() * roundTool) / roundTool);
-            iter.put("songRevenue",
+            nodeIter.put("songRevenue",
                     Math.round(artist.getSongRevenue() * roundTool) / roundTool);
-            iter.put("ranking", artist.getRanking());
-            iter.put("mostProfitableSong", artist.getMostProfitableSong());
+            nodeIter.put("ranking", artist.getRanking());
+            nodeIter.put("mostProfitableSong", artist.getMostProfitableSong());
 
-            resultNode.set(artist.getUsername(), iter);
+            resultNode.set(artist.getUsername(), nodeIter);
         }
 
         objectNode.put("result", resultNode);
@@ -1275,6 +1279,7 @@ public final class Admin {
 
     /**
      * Adds the users from the library to the observers list
+     *
      */
     public void initializeObservers() {
         for (User user: users) {
@@ -1333,6 +1338,7 @@ public final class Admin {
 
     /**
      * Loads an ad on the user player if possible
+     *
      * @param user the user
      * @param price the ad price
      * @return the command message

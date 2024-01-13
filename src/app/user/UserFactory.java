@@ -7,7 +7,7 @@ public final class UserFactory {
     /**
      * Centralizes the logic of abstract user objects creation
      *
-     * @param contentType specialized abstract user
+     * @param userType specialized abstract user
      * @param username the username of the user
      * @param age the age of the user
      * @param city the city of the user

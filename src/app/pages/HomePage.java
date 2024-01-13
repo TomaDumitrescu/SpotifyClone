@@ -36,6 +36,8 @@ public final class HomePage implements Page {
      *
      * @param songs the songs
      * @param playlists the playlists
+     * @param recSongs the recommended songs
+     * @param recPlaylists the recommended playlists
      */
     public HomePage(final List<Song> songs, final List<Playlist> playlists,
                     final List<Song> recSongs, final List<Playlist> recPlaylists) {

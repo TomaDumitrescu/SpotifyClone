@@ -672,6 +672,7 @@ public final class User extends UserAbstract implements Observer {
      *
      * @param recommend the recommendation type
      * @param songs the admin list of songs
+     * @param users the admin list of users
      */
     public void updateRecommendations(final String recommend,
                                       final List<Song> songs,
@@ -731,6 +732,8 @@ public final class User extends UserAbstract implements Observer {
 
     /**
      * Adds to the list of recommended playlists
+     *
+     * @param songs the admin list of songs
      */
     private void recommendPlaylist(final List<Song> songs) {
         HashMap<String, Integer> gMap = getGenresMap();
@@ -979,6 +982,7 @@ public final class User extends UserAbstract implements Observer {
     /**
      * Gets the creator page of the current track
      *
+     * @param pageType the page type
      * @return the command message
      */
     public String setLiveCreatorPage(final String pageType) {
@@ -1018,6 +1022,7 @@ public final class User extends UserAbstract implements Observer {
                 String hostName = collection.getOwner();
                 Host host = Admin.getInstance().getHost(hostName);
                 setCurrentPage(host.getPage());
+
                 pageHistory.add(currentPage);
                 pageIndex++;
 
@@ -1063,12 +1068,13 @@ public final class User extends UserAbstract implements Observer {
         return outputNotifications;
     }
 
-    public void pay(final Double price, final Artist seller,
-                    final String productType) {
-        if (productType.equals("song")) {
-            seller.setSongRevenue(seller.getSongRevenue() + price);
-        } else if (productType.equals("merchandise")) {
-            seller.setMerchRevenue(seller.getMerchRevenue() + price);
-        }
+    /**
+     * Adds price to the merchRevenue of an artist
+     *
+     * @param price the price
+     * @param seller the artist
+     */
+    public void pay(final Double price, final Artist seller) {
+        seller.setMerchRevenue(seller.getMerchRevenue() + price);
     }
 }

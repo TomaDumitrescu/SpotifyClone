@@ -796,8 +796,8 @@ public final class CommandRunner {
     public static ObjectNode wrapped(final CommandInput commandInput) {
         StringBuilder message = new StringBuilder();
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        ObjectNode result = objectMapper.createObjectNode();
+        ObjectMapper objectMapperWrap = new ObjectMapper();
+        ObjectNode result = objectMapperWrap.createObjectNode();
 
         User user = admin.getUser(commandInput.getUsername());
         UserWrap userWrap = UserWrap.getInstance();
@@ -997,7 +997,7 @@ public final class CommandRunner {
     }
 
     /**
-     * Prints the received notifications for an user.
+     * Prints the received notifications for a user.
      *
      * @param commandInput the command input
      * @return the object node
@@ -1042,7 +1042,7 @@ public final class CommandRunner {
     }
 
     /**
-     * Prints the merchandise product bought by an user
+     * Prints the merchandise product bought by a user.
      *
      * @param commandInput the command input
      * @return the object node
@@ -1068,7 +1068,7 @@ public final class CommandRunner {
     }
 
     /**
-     * Command to update the user to premium subscription
+     * Command to update the user to premium subscription.
      *
      * @param commandInput the command input
      * @return the object node
@@ -1098,7 +1098,7 @@ public final class CommandRunner {
     }
 
     /**
-     * Command to update the user to free subscription
+     * Command to update the user to free subscription.
      *
      * @param commandInput the command input
      * @return the object node
@@ -1129,7 +1129,7 @@ public final class CommandRunner {
     }
 
     /**
-     * Loads the ad as a song
+     * Record the ad as a song.
      *
      * @param commandInput the command input
      * @return the object node

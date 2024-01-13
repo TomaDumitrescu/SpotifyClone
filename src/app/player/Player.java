@@ -123,9 +123,11 @@ public final class Player {
         }
 
         if (entry.getName().equals("Ad Break")) {
+            // waiting state
             ad = (Song) entry;
             return;
         } else {
+            // ads can be overwritten by other loads
             ad = null;
         }
 
@@ -226,6 +228,9 @@ public final class Player {
 
         if (source.getDuration() == 0 && paused) {
             if (ad != null) {
+                /* the current song finished, then record the ad,
+                 * since it can be interrupted after debuting
+                 */
                 recordAd();
             }
 
@@ -382,11 +387,13 @@ public final class Player {
             Song copySong = new Song(song.getName(), song.getDuration(), song.getAlbum(),
                     song.getTags(), song.getLyrics(), song.getGenre(),
                     song.getReleaseYear(), song.getArtist());
+            // useful for determining correct formula for monetization
             copySong.setPremiumListen(premiumListen);
             copySong.setPrice(song.getPrice());
 
             recordedSongs.add(copySong);
 
+            // ads are not part of current statistical populations
             if (song.getName().equals("Ad Break")) {
                 return;
             }
@@ -397,6 +404,7 @@ public final class Player {
 
             for (Artist artist: artists) {
                 if (artist.getUsername().equalsIgnoreCase(song.getArtist())) {
+                    // 1 for the song, 1 for the album
                     artist.setListens(artist.getListens() + 2);
                     break;
                 }
@@ -429,8 +437,10 @@ public final class Player {
     /**
      * Adds a recorded entry to the list, each object listened from a collection
      * incrementing the collection listens
+     *
      */
     public void addRecord() {
+        // listens count for the audio file and collection every time
         setRecord(true);
         setRecord(false);
     }

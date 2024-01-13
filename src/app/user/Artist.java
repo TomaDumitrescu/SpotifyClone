@@ -116,6 +116,7 @@ public final class Artist extends ContentCreator {
 
     /**
      * Calculates the total revenue of the artist
+     *
      * @return song revenue added with merch revenue
      */
     public double totalRevenue() {

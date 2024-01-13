@@ -8,7 +8,7 @@ The project adds some functionalities for the spotify simulator, performing
 statistics on user listening activity, making song recommendations,
 monetization for artist products in function of the user type, more complex
 page navigation, running ads, notification systems for subscribers. The
-solution uses the solution skeleton.
+program uses the solution skeleton.
 
 ## Implementation details
 For performing different statistics for a specific user, the listens will be
@@ -70,12 +70,13 @@ from the mentioned lists in a hashmap to efficiently handle duplicates
 is needed for sorting the genres hashmap that will lead to making the playlist
 list of songs from top 5 songs of first genre, 3 for second and two for third.
 
-Two fields will retain last recommended song and playlist, facilitating the
-load recommendation, setting the source and then resuming the player.
+Two fields will retain last recommended song and playlist (one will equal null),
+facilitating the load (just setting the source and then resuming the player).
 
 For page navigation, the page history is an arraylist. The current page is
 described by a current index, and nextPage, prevPage mean incrementing or
-decrementing the index if possible (if the page exists).
+decrementing the index if possible (if the page exists). History additions
+are done in Admin changePage method, including the requested forward reset.
 
 ## Design patterns
 Factory -> UserAbstract, used for obj creation encapsulation, it instantiates
@@ -84,13 +85,14 @@ a user, artist or host, by passing the user type, username, age, city as param.
 Singleton, lazy instantiation -> UserWrap, ArtistWrap, HostWrap, Admin, used
 because there is need only for one (global) instance of the mentioned classes.
 
-Observer -> Subject = Notification Manager, Observer = User, notifies users
-when certain events happen from their subscription. Used for flexibility (new
-features like artists and hosts notified about platform events), live updates.
-////////////////////////////////////////////////////////////////////////////////
-Command -> Invoker: Admin; Receivers: UserWrapCommand, ArtistWrapCommand,
-HostWrapCommand; Command: the interface WrapCommand.
+Observer -> Subject = Notification Manager, Observer = interface (...user);
+notifies users for new events from their subscriptions. Used for flexibility
+(new features like artists, hosts notified of platform events), live updates.
 
+Strategy -> Strategy = WrapStrategy, ConcreteStrategies = UserWrap, ArtistWrap,
+HostWrap, Context = Admin (not interacting with concrete strategies),
+CommandRunner instantiates the concrete strategy based on the command input.
+Used for statistics extensibility, algorithms encapsulation.
 
 ## Bibliography
 1. https://docs.oracle.com/en/java/javase/19/

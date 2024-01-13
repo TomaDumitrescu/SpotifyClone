@@ -83,6 +83,7 @@ public final class Main {
         Admin admin = Admin.getInstance();
         SearchBar.updateAdmin();
         admin.setUsers(library.getUsers());
+
         admin.initializeObservers();
 
         admin.setSongs(library.getSongs());

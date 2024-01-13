@@ -83,6 +83,7 @@ public final class UserWrap implements WrapStrategy {
         LinkedHashMap<String, Integer> genres = new LinkedHashMap<>();
         LinkedHashMap<String, Integer> albums = new LinkedHashMap<>();
 
+        // specialized library entry lists from the recordedEntries
         LinkedHashMap<RecordedEntry, Integer> songs = recordedEntries.entrySet()
                 .stream()
                 .filter(obj -> "song".equals(obj.getKey().getType()))

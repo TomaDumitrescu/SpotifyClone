@@ -74,6 +74,8 @@ public final class HostWrap implements WrapStrategy {
             currentListens = 0;
 
             currentUserRec = user.getPlayer().getRecordedEntries();
+
+            // avoids duplicates and counts listens
             currentListens += insertEpisodes(currentUserRec, topEpisodes);
 
             if (currentListens != 0) {

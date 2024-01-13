@@ -107,6 +107,7 @@ public final class ArtistWrap implements WrapStrategy {
 
         int listeners = 0, currentListens;
 
+        // find different object types from recorded entries
         LinkedHashMap<RecordedEntry, Integer> topSongs = new LinkedHashMap<>();
         LinkedHashMap<RecordedEntry, Integer> topAlbums = new LinkedHashMap<>();
         LinkedHashMap<String, Integer> topUsers = new LinkedHashMap<>();
@@ -117,6 +118,8 @@ public final class ArtistWrap implements WrapStrategy {
             currentListens = 0;
 
             currentUserRec = user.getPlayer().getRecordedEntries();
+
+            // avoiding duplicates and counting listens
             currentListens += insertSongs(currentUserRec, topSongs);
             insertAlbums(currentUserRec, topAlbums);
             topUsers.put(user.getUsername(), currentListens);
@@ -135,12 +138,15 @@ public final class ArtistWrap implements WrapStrategy {
         LinkedHashMap<String, Integer> printSongs = new LinkedHashMap<>();
         LinkedHashMap<String, Integer> printAlbums = new LinkedHashMap<>();
         ArrayList<String> printUsers = new ArrayList<>();
+
         for (Map.Entry<RecordedEntry, Integer> song: topSongs.entrySet()) {
             printSongs.put(song.getKey().getName(), song.getValue());
         }
+
         for (Map.Entry<RecordedEntry, Integer> album: topAlbums.entrySet()) {
             printAlbums.put(album.getKey().getName(), album.getValue());
         }
+
         for (Map.Entry<String, Integer> user: topUsers.entrySet()) {
             if (user.getValue() == 0) {
                 break;
