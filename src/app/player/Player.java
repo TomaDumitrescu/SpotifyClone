@@ -221,19 +221,19 @@ public final class Player {
      * Next.
      */
     public void next() {
+        if (ad != null) {
+            /* the current song finished, then record the ad,
+             * since it can be interrupted after debuting
+             */
+            recordAd();
+        }
+
         paused = source.setNextAudioFile(repeatMode, shuffle);
         if (repeatMode == Enums.RepeatMode.REPEAT_ONCE) {
             repeatMode = Enums.RepeatMode.NO_REPEAT;
         }
 
         if (source.getDuration() == 0 && paused) {
-            if (ad != null) {
-                /* the current song finished, then record the ad,
-                 * since it can be interrupted after debuting
-                 */
-                recordAd();
-            }
-
             stop();
         } else {
             addRecord();
@@ -453,9 +453,9 @@ public final class Player {
         Song copySong = new Song(ad.getName(), ad.getDuration(), ad.getAlbum(),
                 ad.getTags(), ad.getLyrics(), ad.getGenre(),
                 ad.getReleaseYear(), ad.getArtist());
-        copySong.setPremiumListen(premiumListen);
         copySong.setPrice(ad.getPrice());
 
+        // by default, ads will be listened in free mode
         recordedSongs.add(copySong);
     }
 }

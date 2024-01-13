@@ -7,6 +7,7 @@ import app.audio.Collections.Podcast;
 import app.audio.Files.AudioFile;
 import app.audio.Files.Episode;
 import app.audio.Files.Song;
+import app.audio.RecordedEntry;
 import app.pages.Page;
 import app.player.Player;
 import app.user.User;
@@ -68,6 +69,7 @@ public final class Admin {
     private final int dateFebHigherLimit = 28;
     private final double roundTool = 100.0;
     private final double premiumPrice = 1000000;
+    private final int resetedOnce = -1;
     private NotificationManager notificationManager = new NotificationManager();
     @Setter
     private Song ad;
@@ -1056,26 +1058,27 @@ public final class Admin {
             ArrayList<Song> recordedSongs = user.getPlayer().getRecordedSongs();
 
             int totalSongs = recordedSongs.size();
-            int totalListened = 0, start = -1, totalProducts = 0;
+            int start = resetedOnce;
+            int songArtist = 0, songTotal = 0;
             double premiumRevenue;
 
             for (int i = 0; i < totalSongs; i++) {
                 Song song = recordedSongs.get(i);
-                if (song.isPremiumListen() && !song.getName().equals("Ad Break")) {
-                    totalProducts++;
+                if (song.isPremiumListen()) {
+                    songTotal++;
                 }
 
-                if (start == -1 && song.isPremiumListen()) {
+                if (start == resetedOnce && song.isPremiumListen()) {
                     start = i;
                 }
 
                 if (song.isPremiumListen() && song.getArtist().equals(artist.getUsername())) {
-                    totalListened++;
+                    songArtist++;
                 }
 
                 if ((!song.isPremiumListen() || i == totalSongs - 1)
-                        && totalListened != 0) {
-                    premiumRevenue = premiumPrice * totalListened / totalProducts;
+                        && songTotal != 0) {
+                    premiumRevenue = premiumPrice * songArtist / songTotal;
 
                     double currentRevenue;
                     for (int j = start; j < i; j++) {
@@ -1084,28 +1087,27 @@ public final class Admin {
                             continue;
                         }
 
-                        if (songItr.getName().equals("Ad Break") || !songItr.isPremiumListen()) {
+                        if (!songItr.isPremiumListen()) {
                             continue;
                         }
 
                         currentRevenue = songItr.getRevenue();
                         songItr.setRevenue(currentRevenue + premiumRevenue
-                                / totalListened);
+                                / songTotal);
                     }
 
                     Song songItr = recordedSongs.get(i);
                     if (i == totalSongs - 1 && songItr.isPremiumListen()
-                        && !songItr.getName().equals("Ad Break")
                             && songItr.getArtist().equals(artist.getUsername())) {
                         currentRevenue = recordedSongs.get(i).getRevenue();
                         recordedSongs.get(i).setRevenue(currentRevenue + premiumRevenue
-                                / totalListened);
+                                / songTotal);
                     }
 
                     artist.setSongRevenue(artist.getSongRevenue() + premiumRevenue);
-                    totalListened = 0;
-                    totalProducts = 0;
-                    start = -1;
+                    songTotal = 0;
+                    songArtist = 0;
+                    start = resetedOnce;
                 }
             }
         }
@@ -1120,22 +1122,22 @@ public final class Admin {
         for (User user: users) {
             ArrayList<Song> recordedSongs = user.getPlayer().getRecordedSongs();
             int totalSongs = recordedSongs.size();
-            int totalListened = 0, start = 0, totalProducts = 0;
-            double adRevenue, songLast;
+            int start = 0;
+            int songLast = 0, songArtist = 0;
+            double adRevenue;
 
             for (int i = 0; i < totalSongs; i++) {
                 Song song = recordedSongs.get(i);
                 if (!song.isPremiumListen() && song.getArtist().equals(artist.getUsername())) {
-                    totalListened++;
+                    songArtist++;
                 }
 
                 if (!song.isPremiumListen() && !song.getName().equals("Ad Break")) {
-                    totalProducts++;
+                    songLast++;
                 }
 
-                if (song.getName().equals("Ad Break") && i != start) {
-                    songLast = i - start;
-                    adRevenue = ((double) song.getPrice()) * totalListened / totalProducts;
+                if (song.getName().equals("Ad Break") && songLast != 0) {
+                    adRevenue = ((double) song.getPrice()) * songArtist / songLast;
 
                     double currentRevenue;
                     for (int j = start; j < i; j++) {
@@ -1155,9 +1157,9 @@ public final class Admin {
                     }
 
                     artist.setSongRevenue(artist.getSongRevenue() + adRevenue);
-                    totalListened = 0;
                     start = i + 1;
-                    totalProducts = 0;
+                    songLast = 0;
+                    songArtist = 0;
                 }
             }
         }
