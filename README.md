@@ -1,12 +1,16 @@
-# Spotify
+# Spotify clone
 
 #### Copyright 2023 - Dumitrescu Toma-Ioan
 
 ## Description
-The project implements spotify core functionalities and performs
-statistics on user listening activity, making song recommendations,
-monetization for artist products in function of the user type, more complex
-page navigation, running ads, notification systems for subscribers.
+The project implements spotify core functionalities. The current stage
+of project focuses on performing statistics on user listening activity,
+making song recommendations, monetization for artist products in function
+of the user type, more complex page navigation, running ads, notification
+systems for subscribers. The testing part is only for the current stage,
+since the core functionalities (audio player, pagination, search bar,
+notification manager, user types) were already tested (stages 1 and 2)
+after implementation.
 
 ## Implementation details
 For performing different statistics for a specific user, the listens will be
