@@ -44,7 +44,7 @@ public final class Checkstyle {
             System.out
                     .println("CHECKSTYLE = "
                             + ((errors <= CheckerConstants.MAXIMUM_ERROR_CHECKSTYLE)
-                            ? "10/10" : "0/10"));
+                            ? "PASS" : "ERROR"));
             System.out
                     .println("-----------------------------------------------------");
             return (errors <= CheckerConstants.MAXIMUM_ERROR_CHECKSTYLE)

@@ -26,28 +26,24 @@ public final class Checker {
 
         Path path = Paths.get(".git");
         if (Files.exists(path)) {
-            gitScore = CheckerConstants.FIVE_POINTS;
-            System.out.println(gitScore + "/5");
+            System.out.println("PASS");
         } else {
-            gitScore = CheckerConstants.ZERO_POINTS;
-            System.out.println(gitScore + "/5");
+            System.out.println("ERROR");
         }
     }
 
     private static void calculateScoreReadme() {
         System.out.println("-----------------------------------------------------");
-        System.out.print("README score = ");
+        System.out.print("README ");
         Path path1 = Paths.get("README");
         Path path2 = Paths.get("README.md");
         Path path3 = Paths.get("README.txt");
 
         if (Files.exists(path1) || Files.exists(path2) || Files.exists(path3)) {
-            readmeScore = CheckerConstants.FIVE_POINTS;
-            System.out.println(readmeScore + "/5");
+            System.out.println("PRESENT");
 
         } else {
-            readmeScore = CheckerConstants.ZERO_POINTS;
-            System.out.println(readmeScore + "/5");
+            System.out.println("NOT PRESENT");
         }
     }
 
@@ -62,13 +58,6 @@ public final class Checker {
         calculateScoreReadme();
 
         int finalScore = totalScore + gitScore + readmeScore + checkstyleScore;
-        System.out.println("-----------------------------------------------------");
-        System.out.println("FINAL SCORE = " + finalScore + "/100");
-
-        if (finalScore == CheckerConstants.MAX_POINTS) {
-            System.out.println("\nAcum ca ai terminat, sigur esti un..."
-                    + " https://www.youtube.com/watch?v=1LZZYemqLyU");
-        }
     }
 
     /**
@@ -98,9 +87,6 @@ public final class Checker {
 
             totalScore += calculateScore(file);
         }
-
-        System.out.println("-----------------------------------------------------");
-        System.out.println("TESTS = " + totalScore + "/80");
     }
 
     /**
@@ -113,15 +99,14 @@ public final class Checker {
             for (int i = 1;  i <= CheckerConstants.LEN_LONGEST_TEST_NAME - input.length(); i++) {
                 System.out.print("-");
             }
-            System.out.println("--------------------------------------------- PASSED (+"
-                    + getScoreForTest(input) + ")");
+            System.out.println("--------------------------------------------- PASSED");
             return getScoreForTest(input);
         } else {
             System.out.print(input + " ");
             for (int i = 1; i <= CheckerConstants.LEN_LONGEST_TEST_NAME - input.length(); i++) {
                 System.out.print("-");
             }
-            System.out.println("--------------------------------------------- FAILED (+0)");
+            System.out.println("--------------------------------------------- FAILED");
             return 0;
         }
     }

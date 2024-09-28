@@ -1,14 +1,12 @@
-# Project GlobalWaves  - Third Stage
+# Spotify
 
 #### Copyright 2023 - Dumitrescu Toma-Ioan
-#### Faculty of Automatic Control and Computer Science, group 321CA
 
 ## Description
-The project adds some functionalities for the spotify simulator, performing
+The project implements spotify core functionalities and performs
 statistics on user listening activity, making song recommendations,
 monetization for artist products in function of the user type, more complex
-page navigation, running ads, notification systems for subscribers. The
-program uses the solution skeleton.
+page navigation, running ads, notification systems for subscribers.
 
 ## Implementation details
 For performing different statistics for a specific user, the listens will be
@@ -95,5 +93,4 @@ CommandRunner instantiates the concrete strategy based on the command input.
 Used for statistics extensibility, algorithms encapsulation.
 
 ## Bibliography
-1. https://docs.oracle.com/en/java/javase/19/
-2. https://ocw.cs.pub.ro/courses/poo-ca-cd/laboratoare
+https://docs.oracle.com/en/java/javase/19/
