@@ -7,7 +7,6 @@ import app.audio.Collections.Podcast;
 import app.audio.Files.AudioFile;
 import app.audio.Files.Episode;
 import app.audio.Files.Song;
-import app.audio.RecordedEntry;
 import app.pages.Page;
 import app.player.Player;
 import app.user.User;
@@ -298,6 +297,8 @@ public final class Admin {
         if (type.equals("user")) {
             User user = (User) UserFactory.createUser(type, username, age, city);
             users.add(user);
+
+            // update the list of observers in notification manager
             notificationManager.addObserver(user);
         } else if (type.equals("artist")) {
             Artist artist = (Artist) UserFactory.createUser(type, username, age, city);
@@ -350,7 +351,9 @@ public final class Admin {
                                             .removeAll(user.getPlaylists()));
 
         users.remove(user);
+
         notificationManager.rmObserver(user);
+
         return "%s was successfully deleted.".formatted(user.getUsername());
     }
 
@@ -1057,8 +1060,7 @@ public final class Admin {
         for (User user: users) {
             ArrayList<Song> recordedSongs = user.getPlayer().getRecordedSongs();
 
-            int totalSongs = recordedSongs.size();
-            int start = resetedOnce;
+            int totalSongs = recordedSongs.size(), start = resetedOnce;
             int songArtist = 0, songTotal = 0;
             double premiumRevenue;
 
@@ -1099,6 +1101,7 @@ public final class Admin {
                     Song songItr = recordedSongs.get(i);
                     if (i == totalSongs - 1 && songItr.isPremiumListen()
                             && songItr.getArtist().equals(artist.getUsername())) {
+
                         currentRevenue = recordedSongs.get(i).getRevenue();
                         recordedSongs.get(i).setRevenue(currentRevenue + premiumRevenue
                                 / songTotal);
@@ -1152,6 +1155,7 @@ public final class Admin {
 
                     if (i == totalSongs - 1 && !recordedSongs.get(i).isPremiumListen()
                         && !recordedSongs.get(i).getName().equals("Ad Break")) {
+
                         currentRevenue = recordedSongs.get(i).getRevenue();
                         recordedSongs.get(i).setRevenue(currentRevenue + adRevenue / songLast);
                     }
@@ -1211,7 +1215,9 @@ public final class Admin {
 
         for (User user: users) {
             ArrayList<Song> recordedSongs = user.getPlayer().getRecordedSongs();
+
             recordedSongs.removeIf(song -> song.getName().equals("Ad Break"));
+
             for (Song song: recordedSongs) {
                 if (song.getArtist().equals(artist.getUsername())) {
                     addSongRevenue(song, artistSongs);

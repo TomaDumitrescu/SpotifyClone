@@ -44,6 +44,7 @@ public class RecordedEntry extends LibraryEntry {
         }
 
         RecordedEntry cmp = (RecordedEntry) o;
+
         return getName().equalsIgnoreCase(cmp.getName())
                 && getCreator().equalsIgnoreCase(cmp.getCreator());
     }

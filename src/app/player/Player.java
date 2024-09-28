@@ -356,6 +356,7 @@ public final class Player {
             }
 
             String productType;
+
             if (type.equals("album")) {
                 productType = "album";
             } else if (type.equals("podcast")) {
@@ -387,6 +388,7 @@ public final class Player {
             Song copySong = new Song(song.getName(), song.getDuration(), song.getAlbum(),
                     song.getTags(), song.getLyrics(), song.getGenre(),
                     song.getReleaseYear(), song.getArtist());
+
             // useful for determining correct formula for monetization
             copySong.setPremiumListen(premiumListen);
             copySong.setPrice(song.getPrice());

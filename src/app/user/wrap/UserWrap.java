@@ -137,6 +137,7 @@ public final class UserWrap implements WrapStrategy {
         for (Map.Entry<RecordedEntry, Integer> song: songs.entrySet()) {
             printData.put(song.getKey().getName(), song.getValue());
         }
+
         result.set("topSongs", objectMapper.valueToTree(printData));
         printData.clear();
 
@@ -147,6 +148,7 @@ public final class UserWrap implements WrapStrategy {
         for (Map.Entry<RecordedEntry, Integer> episode: episodes.entrySet()) {
             printData.put(episode.getKey().getName(), episode.getValue());
         }
+
         result.set("topEpisodes", objectMapper.valueToTree(printData));
         printData.clear();
 
@@ -168,6 +170,7 @@ public final class UserWrap implements WrapStrategy {
                       final LinkedHashMap<RecordedEntry, Integer> songs,
                       final LinkedHashMap<String, Integer> albums,
                       final LinkedHashMap<RecordedEntry, Integer> episodes) {
+
         return artists.isEmpty() && genres.isEmpty() && songs.isEmpty()
                 && albums.isEmpty() && episodes.isEmpty();
     }

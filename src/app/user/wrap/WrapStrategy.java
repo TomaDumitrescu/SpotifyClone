@@ -18,6 +18,7 @@ public interface WrapStrategy {
      */
     default void sortStringIntMaps(final LinkedHashMap<String, Integer> map,
                                    int topReference) {
+
         LinkedHashMap<String, Integer> orderedMap = map.entrySet()
                 .stream()
                 .sorted(Map.Entry.<String, Integer>comparingByValue(Comparator.reverseOrder())
@@ -28,13 +29,16 @@ public interface WrapStrategy {
                         (obj1, obj2) -> obj1,
                         LinkedHashMap::new
                 ));
+
         map.clear();
         map.putAll(orderedMap);
 
         int len = map.size();
+
         if (len > topReference) {
             List<String> trashKeys = new ArrayList<>(map.keySet())
                     .subList(topReference, len);
+
             for (String key: trashKeys) {
                 map.remove(key);
             }
@@ -59,13 +63,16 @@ public interface WrapStrategy {
                         (obj1, obj2) -> obj1,
                         LinkedHashMap::new
                 ));
+
         map.clear();
         map.putAll(orderedMap);
 
         int len = map.size();
+
         if (len > topReference) {
             List<RecordedEntry> trashKeys = new ArrayList<>(map.keySet())
                     .subList(topReference, len);
+
             for (RecordedEntry key: trashKeys) {
                 map.remove(key);
             }

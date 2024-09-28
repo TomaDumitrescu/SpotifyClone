@@ -809,6 +809,7 @@ public final class CommandRunner {
         HostWrap hostWrap = HostWrap.getInstance();
 
         if (user != null && user.getPlayer() != null) {
+            userWrap.setUsername(commandInput.getUsername());
             userWrap.setRecordedEntries(user.getPlayer().getRecordedEntries());
             userWrap.setListenedGenres(user.getPlayer().getListenedGenres());
             result = admin.wrapped(userWrap);
@@ -844,6 +845,7 @@ public final class CommandRunner {
         objectNode.put("command", commandInput.getCommand());
         objectNode.put("user", commandInput.getUsername());
         objectNode.put("timestamp", commandInput.getTimestamp());
+
         if (message.toString().equals("result")) {
             objectNode.put("result", result);
         } else {
@@ -1084,6 +1086,7 @@ public final class CommandRunner {
         } else {
             user.setPremiumType(true);
             user.getPlayer().setPremiumListen(true);
+
             message = "%s bought the subscription successfully."
                     .formatted(commandInput.getUsername());
         }

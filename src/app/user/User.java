@@ -239,6 +239,7 @@ public final class User extends UserAbstract implements Observer {
             if (recommendedPlaylist.getSongs().isEmpty()) {
                 return "No recommendations available.";
             }
+
             player.setSource(recommendedPlaylist, "playlist");
             player.pause();
         }
@@ -751,6 +752,7 @@ public final class User extends UserAbstract implements Observer {
         if (orderedMap.size() > topRecommended) {
             List<String> trashKeys = new ArrayList<>(orderedMap.keySet())
                     .subList(topRecommended, orderedMap.size());
+
             for (String key: trashKeys) {
                 orderedMap.remove(key);
             }
@@ -808,6 +810,7 @@ public final class User extends UserAbstract implements Observer {
 
         String pName = "%s's recommendations".formatted(getUsername());
         Playlist playlist = new Playlist(pName, getUsername());
+
         for (Song song: playlistSongs) {
             playlist.addSong(song);
         }
@@ -858,6 +861,7 @@ public final class User extends UserAbstract implements Observer {
     public void recommendFanPlaylist(final List<User> users) {
         AudioFile audioFile = player.getCurrentAudioFile();
         String type = player.getType();
+
         if (audioFile == null || !type.equals("song")) {
             return;
         }
@@ -885,10 +889,12 @@ public final class User extends UserAbstract implements Observer {
         }
 
         List<Song> playlistSongs = new ArrayList<>();
+
         for (User user: users) {
             List<Song> likedSongsItr = user.getLikedSongs();
             likedSongsItr.sort(Comparator.comparingInt(Song::getLikes));
             int i = 0;
+
             while (i < likedSongsItr.size() && i < topReference) {
                 playlistSongs.add(likedSongsItr.get(i));
                 i++;
@@ -932,16 +938,20 @@ public final class User extends UserAbstract implements Observer {
 
         int currentListens;
         List<Integer> userListens = new ArrayList<>();
+
         for (User user: users) {
             currentListens = 0;
             HashMap<RecordedEntry, Integer> recList = user.player.getRecordedEntries();
+
             for (Map.Entry<RecordedEntry, Integer> rec: recList.entrySet()) {
                 RecordedEntry audioProduct = rec.getKey();
+
                 if (audioProduct.getCreator().equals(artist)
                     && audioProduct.getType().equals("song")) {
                     currentListens += rec.getValue();
                 }
             }
+
             userListens.add(currentListens);
         }
         return userListens;
@@ -956,6 +966,7 @@ public final class User extends UserAbstract implements Observer {
         if (pageIndex - 1 < 0 || pageHistory.isEmpty()) {
             return "There are no pages left to go back.";
         }
+
         pageIndex--;
         currentPage = pageHistory.get(pageIndex);
 
@@ -972,6 +983,7 @@ public final class User extends UserAbstract implements Observer {
         if (pageIndex + 1 >= pageHistory.size()) {
             return "There are no pages left to go forward.";
         }
+
         pageIndex++;
         currentPage = pageHistory.get(pageIndex);
 
@@ -989,6 +1001,7 @@ public final class User extends UserAbstract implements Observer {
         AudioCollection collection = player.getCurrentAudioCollection();
         AudioFile file = player.getCurrentAudioFile();
         String type = player.getType();
+
         if (collection == null && file == null) {
             return "%s is trying to access a non-existent page.".formatted(getUsername());
         }
@@ -1003,6 +1016,7 @@ public final class User extends UserAbstract implements Observer {
 
         if (pageType.equals("artist")) {
             String artistName;
+
             if (collection != null) {
                 artistName = collection.getOwner();
                 Artist artist = Admin.getInstance().getArtist(artistName);

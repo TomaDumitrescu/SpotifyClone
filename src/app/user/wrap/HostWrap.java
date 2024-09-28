@@ -33,6 +33,7 @@ public final class HostWrap implements WrapStrategy {
         if (instance == null) {
             instance = new HostWrap();
         }
+
         return instance;
     }
 
@@ -49,8 +50,10 @@ public final class HostWrap implements WrapStrategy {
 
         for (Map.Entry<RecordedEntry, Integer> rec: currentUserRec.entrySet()) {
             RecordedEntry recorded = rec.getKey();
+
             if (recorded.getType().equalsIgnoreCase("episode")
                     && recorded.getCreator().equalsIgnoreCase(username)) {
+
                 currentListens += rec.getValue();
                 topEpisodes.put(rec.getKey(),
                         topEpisodes.getOrDefault(rec.getKey(), 0) + rec.getValue());
@@ -90,6 +93,7 @@ public final class HostWrap implements WrapStrategy {
         }
 
         LinkedHashMap<String, Integer> printData = new LinkedHashMap<>();
+
         for (Map.Entry<RecordedEntry, Integer> episode: topEpisodes.entrySet()) {
             printData.put(episode.getKey().getName(), episode.getValue());
         }

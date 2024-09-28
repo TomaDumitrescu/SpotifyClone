@@ -34,6 +34,7 @@ public final class ArtistWrap implements WrapStrategy {
         if (instance == null) {
             instance = new ArtistWrap();
         }
+
         return instance;
     }
 
@@ -50,8 +51,10 @@ public final class ArtistWrap implements WrapStrategy {
 
         for (Map.Entry<RecordedEntry, Integer> rec: currentUserRec.entrySet()) {
             RecordedEntry recorded = rec.getKey();
+
             if (recorded.getType().equalsIgnoreCase("song")
                 && recorded.getCreator().equalsIgnoreCase(username)) {
+
                 currentListens += rec.getValue();
                 topSongs.put(rec.getKey(),
                         topSongs.getOrDefault(rec.getKey(), 0) + rec.getValue());
@@ -71,8 +74,10 @@ public final class ArtistWrap implements WrapStrategy {
                              final LinkedHashMap<RecordedEntry, Integer> topAlbums) {
         for (Map.Entry<RecordedEntry, Integer> rec: currentUserRec.entrySet()) {
             RecordedEntry recorded = rec.getKey();
+
             if (recorded.getType().equalsIgnoreCase("album")
                 && recorded.getCreator().equalsIgnoreCase(username)) {
+
                 topAlbums.put(rec.getKey(),
                         topAlbums.getOrDefault(rec.getKey(), 0) + rec.getValue());
             }
@@ -174,6 +179,7 @@ public final class ArtistWrap implements WrapStrategy {
     boolean emptyData(final LinkedHashMap<RecordedEntry, Integer> topSongs,
                       final LinkedHashMap<RecordedEntry, Integer> topAlbums,
                       final LinkedHashMap<String, Integer> topUsers) {
+
         return topSongs.isEmpty() && topAlbums.isEmpty() && topUsers.isEmpty();
     }
 }

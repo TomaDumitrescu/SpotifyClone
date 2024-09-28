@@ -45,8 +45,10 @@ public class NotificationManager {
      */
     public void notifyObservers(final Notification notification, final String username) {
         ArrayList<String> subscriptions;
+
         for (Observer observer: observers) {
             subscriptions = ((User) observer).getSubscriptions();
+
             if (subscriptions.contains(username)) {
                 observer.update(notification);
             }
