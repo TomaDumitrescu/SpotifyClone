@@ -2,7 +2,6 @@
 
 #### Copyright 2023 - Dumitrescu Toma-Ioan
 
-
 ## Description
 The project implements spotify core functionalities. The current stage
 of project focuses on performing statistics on user listening activity,
