@@ -81,6 +81,7 @@ decrementing the index if possible (if the page exists). History additions
 are done in Admin changePage method, including the requested forward reset.
 
 ## Design patterns
+
 Factory -> UserAbstract, used for obj creation encapsulation, it instantiates
 a user, artist or host, by passing the user type, username, age, city as param.
 
